@@ -1,31 +1,3 @@
-/**
- * CIS 455/555 route-based HTTP framework
- *
- * V. Liu, Z. Ives
- *
- * Portions excerpted from or inspired by Spark Framework,
- *
- *                 http://sparkjava.com,
- *
- * with license notice included below.
- */
-
-/*
- * Copyright 2011- Per Wendel
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, softwareƒ
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +7,7 @@ import org.subspark.filter.Filter;
 import org.subspark.route.Route;
 import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.handling.RequestHandler;
+import org.subspark.server.handling.StaticFilesHandler;
 import org.subspark.server.io.BioHttpHandler;
 
 
@@ -52,9 +25,10 @@ public class WebService {
     private int port = DEFAULT_PORT;
     private int threads = DEFAULT_THREADS;
 
-    private final BioHttpListener listener = new BioHttpListener(this);
-    private final BioHttpHandler ioHandler = new BioHttpHandler(this);
-    private final RequestHandler requestHandler =  new RequestHandler(this);
+    private BioHttpListener listener;
+    private BioHttpHandler ioHandler;
+    private RequestHandler requestHandler;
+    private StaticFilesHandler staticFilesHandler;
 
     public BioHttpListener getListener() {
         return listener;
@@ -68,6 +42,8 @@ public class WebService {
         return requestHandler;
     }
 
+    public StaticFilesHandler getStaticFilesHandler() {return staticFilesHandler;}
+
     public static void main(String[] args) {
         WebService ws = new WebService();
         ws.start();
@@ -77,7 +53,12 @@ public class WebService {
      * Launches the Web server thread pool and the listener
      */
     public void start() {
-        this.requestHandler.staticFileLocation(staticFileLocation);
+        this.listener = new BioHttpListener(this);
+        this.ioHandler = new BioHttpHandler(this);
+        this.requestHandler =  new RequestHandler(this);
+        this.staticFilesHandler = new StaticFilesHandler(this);
+
+        this.staticFilesHandler.staticFileLocation(staticFileLocation);
         this.listener.listen();
     }
 

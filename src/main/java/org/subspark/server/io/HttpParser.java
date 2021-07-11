@@ -210,7 +210,7 @@ public class HttpParser {
     /**
      * Parse InputStream and create Request object
      */
-    public static Request parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
+    public static RequestBuilder parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
         RequestBuilder builder = new RequestBuilder();
 
         // Enable mark/reset support
@@ -286,27 +286,31 @@ public class HttpParser {
             throw new ClosedConnectionException();
         }
 
-        return builder.toRequest();
+        return builder;
     }
 
-    public static void sendResponse(OutputStream out, Response response) throws IOException {
-        String statusLine = response.protocol() + " " + response.statusDescription() + "\r\n";
-        String headers = response.headers();
-        byte[] body = response.bodyRaw();
+    public static void sendResponse(OutputStream out, Response response) throws ClosedConnectionException {
+        try {
+            String statusLine = response.protocol() + " " + response.statusDescription() + "\r\n";
+            String headers = response.headers();
+            byte[] body = response.bodyRaw();
 
-        // Write status line
-        out.write(statusLine.getBytes());
+            // Write status line
+            out.write(statusLine.getBytes());
 
-        // Write headers
-        out.write(headers.getBytes());
+            // Write headers
+            out.write(headers.getBytes());
 
-        // Write separating CRLF
-        out.write("\r\n".getBytes());
+            // Write separating CRLF
+            out.write("\r\n".getBytes());
 
-        // Write body bytes
-        if (body != null && body.length > 0)
-            out.write(body);
+            // Write body bytes
+            if (body != null && body.length > 0)
+                out.write(body);
 
-        out.flush();
+            out.flush();
+        } catch (IOException e) {
+            throw new ClosedConnectionException();
+        }
     }
 }

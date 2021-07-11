@@ -6,42 +6,76 @@ import org.apache.logging.log4j.Logger;
 import org.subspark.server.WebService;
 import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.request.Request;
+import org.subspark.server.request.RequestBuilder;
 import org.subspark.server.response.Response;
 import org.subspark.server.response.ResponseBuilder;
 import org.subspark.server.response.Status;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//TODO: Parse path with host name (absolute URL)
 //TODO: Support Chunked Transfer-Encoding (receiving chunked message)
 
 //TODO: Send "100 Continue" on receiving the first line of HTTP/1.1 request
-//TODO: Handle `If-Modified-Since` and `In-Unmodified-Since`
-//TODO: Handle HEAD request
+//TODO: Handle `If-Modified-Since` and `If-Unmodified-Since`t
 
 public class RequestHandler {
     private final static Logger logger = LogManager.getLogger(RequestHandler.class);
 
     private final WebService service;
-    private final StaticFilesHandler staticFilesHandler;
+
+    private final Pattern URLPattern;
 
     public RequestHandler(WebService service) {
         this.service = service;
-        this.staticFilesHandler = new StaticFilesHandler();
+        this.URLPattern = Pattern.compile(String.format("^(http://%s:%d)?((/.*?)(\\?.*)?)$", service.ipAddress(), service.port()));
     }
 
-    public void staticFileLocation(String location) {
-        staticFilesHandler.staticFileLocation(location);
+    /**
+     * Handle absolute URL, substituting with relative URL
+     */
+    private void checkAbsoluteURL(RequestBuilder requestBuilder) throws HaltException {
+        Matcher uriMatcher = URLPattern.matcher(requestBuilder.uri());
+
+        if (!uriMatcher.find())
+            throw new HaltException(Status.BAD_REQUEST, "Invalid Path");
+
+        // Substitute absolute URL
+        // for a URL "http://[hostname][:port]/path/to/file?key1=a&key2=b"
+        // group 1 capture "http://[hostname][:port]"
+        // group 2 capture "/path/to/file?key1=a&key2=b"
+        // group 3 capture "/path/to/file"
+        if (uriMatcher.group(1) != null) {
+            String newURI = uriMatcher.group(2);
+            String newPath = uriMatcher.group(3);
+
+            requestBuilder.uri(newURI);
+            requestBuilder.path(newPath);
+        }
     }
 
     // TODO: add route support (use staticFilesHandler to handle all requests now)
-    public Response handleRequest(Request request) throws HaltException {
+    public Response handleRequest(RequestBuilder requestBuilder) throws HaltException {
+        checkAbsoluteURL(requestBuilder);
+        Request request = requestBuilder.toRequest();
+
         checkSpecification(request);
-        return null;
+
+        ResponseBuilder builder = service.getStaticFilesHandler().consumeFileRequest(request);
+
+        if (!isKeepAlive(request))
+            builder.header("connection", "close");
+
+        return builder.toResponse();
     }
 
     public Response handleException(HaltException exception) {
-        return null;
+        ResponseBuilder builder = new ResponseBuilder();
+
+        builder.status(exception.getStatus())
+                .body(exception.getMessage());
+
+        return builder.toResponse();
     }
 
     /**
