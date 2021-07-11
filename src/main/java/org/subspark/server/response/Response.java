@@ -20,8 +20,7 @@ public class Response {
         this.protocolVersion = protocolVersion;
     }
 
-    // Can't be set by user
-    void header(String header, String value) {
+    public void header(String header, String value) {
         this.headers.put(header, value);
     }
 

@@ -46,7 +46,7 @@ public class FileUtils {
      * If full path is a directory, the full path of "index.html" in
      * the directory will be returned.
      */
-    public static String getFullPath(String basePath, String filePath) {
+    public static String getFullPath(String basePath, String filePath) throws HaltException {
         if (!isFilePathValid(filePath))
             throw new HaltException(Status.FORBIDDEN, "Invalid path.");
 
@@ -61,7 +61,7 @@ public class FileUtils {
     /**
      * Read bytes from given file
      */
-    public static byte[] getFileBytes(String filePath) {
+    public static byte[] getFileBytes(String filePath) throws HaltException {
         File file = new File(filePath);
 
         try {
@@ -84,7 +84,7 @@ public class FileUtils {
     /**
      * Return length of file (count in byte)
      */
-    public static long getFileLength(String filePath) {
+    public static long getFileLength(String filePath) throws HaltException {
         File file = new File(filePath);
 
         if (!file.exists())
@@ -92,14 +92,14 @@ public class FileUtils {
                     "NOT FOUND: File not found!");
         if (file.isDirectory())
             throw new HaltException(Status.INTERNAL_SERVER_ERROR,
-                    "Directory has not length!");
+                    "Directory has no length!");
         return file.length();
     }
 
     /**
      * Return last modified timestamp of given file
      */
-    public static long getLastModified(String filePath) {
+    public static long getLastModified(String filePath) throws HaltException {
         File file = new File(filePath);
 
         if (!file.exists())

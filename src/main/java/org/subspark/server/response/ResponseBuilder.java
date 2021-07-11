@@ -1,6 +1,5 @@
 package org.subspark.server.response;
 
-import org.subspark.server.common.MimeType;
 import org.subspark.util.DateUtils;
 
 public class ResponseBuilder {
