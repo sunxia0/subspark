@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.*;
 
 public class Test {
     private static void testParseRequest() {
@@ -19,7 +19,7 @@ public class Test {
                 "Connection: Close\n\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        Request request = HttpParser.parseRequest(in);
+        Request request = HttpParser.parseRequest(in).toRequest();
 
         System.out.println(request.method());
         System.out.println(request.path());
@@ -36,15 +36,8 @@ public class Test {
             System.out.println(k + ": " + request.header(k));
     }
 
-    private static void connectTest() throws Exception {
+    private static void connect(String header) throws Exception {
         Socket socket = new Socket("localhost", 8080);
-
-        String header = "GET / HTTP/1.1\n" +
-                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
-                "Host: localhost\n" +
-                "Accept: */*\n" +
-                "Referer: https://websniffer.cc/\n" +
-                "Connection: Close\n\n";
 
         byte[] bodyBytes = new byte[1000];
         Arrays.fill(bodyBytes, (byte) 97);
@@ -66,7 +59,37 @@ public class Test {
         }
     }
 
+    private static void getTest() throws Exception {
+        String header = "GET / HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "Connection: close\n\n";
+        connect(header);
+    }
+
+    private static void headTest() throws Exception {
+        String header = "HEAD / HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "Connection: close\n\n";
+        connect(header);
+    }
+
+    private static void absoluteURLTest() throws Exception {
+        String header = "GET http://localhost:8080/ HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "Connection: close\n\n";
+        connect(header);
+    }
+
     public static void main(String[] args) throws Exception {
-        connectTest();
+        absoluteURLTest();
     }
 }
