@@ -12,6 +12,8 @@ import org.subspark.server.response.Status;
 import org.subspark.util.DateUtils;
 import org.subspark.util.FileUtils;
 
+import java.text.ParseException;
+
 public class StaticFilesHandler {
     private final static Logger logger = LogManager.getLogger(StaticFilesHandler.class);
 
@@ -37,21 +39,35 @@ public class StaticFilesHandler {
             throw new HaltException(Status.NOT_FOUND);
 
         ResponseBuilder builder = new ResponseBuilder();
+        builder.protocol(request.protocol());
 
         long lastModified = FileUtils.getLastModified(fullPath);
-        builder.header("last-modified", DateUtils.fromTimestamp(lastModified));
+
+        // Check If-Unmodified-Since
+        long ifUnmodifiedSince = DateUtils.fromDateString(request.header("if-unmodified-since"));
+        if (ifUnmodifiedSince >= 0 && lastModified > ifUnmodifiedSince) {
+            builder.status(Status.PRECONDITION_FAILED);
+            return builder;
+        }
 
         if (method == Method.GET) {
-            builder.header("content-type", MimeType.getMimeType(fullPath))
-                    .body(FileUtils.getFileBytes(fullPath));
+            // Check If-Modified-Since
+            long ifModifiedSince = DateUtils.fromDateString(request.header("if-modified-since"));
+            if (lastModified >= ifModifiedSince) {
+                builder.status(Status.OK)
+                        .header("last-modified", DateUtils.fromTimestamp(lastModified))
+                        .header("content-type", MimeType.getMimeType(fullPath))
+                        .body(FileUtils.getFileBytes(fullPath));
+            }
+            else {
+                builder.status(Status.NOT_MODIFIED);
+            }
         }
         else { // Method.HEAD
-            builder.header("content-length", String.valueOf(FileUtils.getFileLength(fullPath)));
+            builder.status(Status.OK)
+                    .header("last-modified", DateUtils.fromTimestamp(lastModified))
+                    .header("content-length", String.valueOf(FileUtils.getFileLength(fullPath)));
         }
-
-        builder.protocol(request.protocol())
-                .status(Status.OK);
-
         return builder;
     }
 }

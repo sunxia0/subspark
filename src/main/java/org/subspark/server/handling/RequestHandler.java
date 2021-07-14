@@ -4,6 +4,7 @@ package org.subspark.server.handling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.subspark.server.WebService;
+import org.subspark.server.common.MimeType;
 import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.request.Request;
 import org.subspark.server.request.RequestBuilder;
@@ -15,9 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //TODO: Support Chunked Transfer-Encoding (receiving chunked message)
-
 //TODO: Send "100 Continue" on receiving the first line of HTTP/1.1 request
-//TODO: Handle `If-Modified-Since` and `If-Unmodified-Since`t
 
 public class RequestHandler {
     private final static Logger logger = LogManager.getLogger(RequestHandler.class);
@@ -73,6 +72,7 @@ public class RequestHandler {
         ResponseBuilder builder = new ResponseBuilder();
 
         builder.status(exception.getStatus())
+                .header("content-type", MimeType.TXT)
                 .body(exception.getMessage());
 
         return builder.toResponse();

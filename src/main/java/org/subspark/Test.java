@@ -54,7 +54,7 @@ public class Test {
         byte[] bytes = new byte[8192];
         int readBytes;
         while ((readBytes = in.read(bytes)) > 0) {
-            System.out.println(readBytes);
+            // System.out.println(readBytes);
             System.out.println(new String(bytes, 0, readBytes));
         }
     }
@@ -89,7 +89,29 @@ public class Test {
         connect(header);
     }
 
+    private static void ifModifiedSinceTest() throws Exception {
+        String header = "GET / HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "If-Modified-Since: Wed, 22 Jan 2021 19:10:41 GMT\n" +
+                "Connection: close\n\n";
+        connect(header);
+    }
+
+    private static void ifUnModifiedSinceTest() throws Exception {
+        String header = "GET / HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "If-Unmodified-Since: Wed, 19 Jan 2021 19:10:41 GMT\n" +
+                "Connection: close\n\n";
+        connect(header);
+    }
+
     public static void main(String[] args) throws Exception {
-        absoluteURLTest();
+        ifUnModifiedSinceTest();
     }
 }

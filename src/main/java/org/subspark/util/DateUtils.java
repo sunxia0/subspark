@@ -1,6 +1,7 @@
 package org.subspark.util;
 
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -20,5 +21,17 @@ public class DateUtils {
     public static String fromTimestamp(long timestamp) {
         Date date = new Date(timestamp);
         return gmtFormat.format(date);
+    }
+
+    public static long fromDateString(String dateString) {
+        if (dateString == null)
+            return -1L;
+
+        try {
+            Date date = gmtFormat.parse(dateString);
+            return date.getTime();
+        } catch (ParseException e) {
+            return -1L;
+        }
     }
 }
