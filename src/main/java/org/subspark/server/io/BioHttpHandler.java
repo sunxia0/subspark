@@ -55,13 +55,15 @@ public class BioHttpHandler {
 
                         logger.info(requestBuilder.method() + " " + requestBuilder.uri());
 
+                        // Send 100 Continue
+                        if (requestBuilder.protocol().equals(ResponseBuilder.HTTP_1_1)) {
+                            HttpParser.sendResponse(out, ResponseBuilder.of100());
+                        }
+
                         response = requestHandler.handleRequest(requestBuilder);
                     } catch (HaltException e) {
                         response = requestHandler.handleException(e);
                     }
-
-                    // ==== For test: write 404 ====
-                    //response = ResponseBuilder.of404();
 
                     HttpParser.sendResponse(out, response);
 

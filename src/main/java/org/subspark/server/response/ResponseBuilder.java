@@ -1,5 +1,6 @@
 package org.subspark.server.response;
 
+import org.subspark.server.request.Request;
 import org.subspark.util.DateUtils;
 
 public class ResponseBuilder {
@@ -61,11 +62,10 @@ public class ResponseBuilder {
         return response;
     }
 
-    public static Response of404() {
-        ResponseBuilder builder = new ResponseBuilder();
-        builder.status(Status.NOT_FOUND)
-                .header("connection", CONNECTION_CLOSE)
-                .body(Status.NOT_FOUND.description());
-        return builder.toResponse();
+    public static Response of100() {
+        Response response = new Response();
+        response.protocol(HTTP_1_1);
+        response.status(Status.CONTINUE);
+        return response;
     }
 }

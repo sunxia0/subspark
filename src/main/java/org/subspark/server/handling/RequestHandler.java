@@ -16,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //TODO: Support Chunked Transfer-Encoding (receiving chunked message)
-//TODO: Send "100 Continue" on receiving the first line of HTTP/1.1 request
 
 public class RequestHandler {
     private final static Logger logger = LogManager.getLogger(RequestHandler.class);

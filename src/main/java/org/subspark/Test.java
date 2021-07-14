@@ -54,8 +54,7 @@ public class Test {
         byte[] bytes = new byte[8192];
         int readBytes;
         while ((readBytes = in.read(bytes)) > 0) {
-            // System.out.println(readBytes);
-            System.out.println(new String(bytes, 0, readBytes));
+            System.out.print(new String(bytes, 0, readBytes));
         }
     }
 
@@ -112,6 +111,6 @@ public class Test {
     }
 
     public static void main(String[] args) throws Exception {
-        ifUnModifiedSinceTest();
+        ifModifiedSinceTest();
     }
 }
