@@ -36,14 +36,8 @@ public class Test {
             System.out.println(k + ": " + request.header(k));
     }
 
-    private static void connect(String header) throws Exception {
+    private static void connect(String req) throws Exception {
         Socket socket = new Socket("localhost", 8080);
-
-        byte[] bodyBytes = new byte[1000];
-        Arrays.fill(bodyBytes, (byte) 97);
-        String body = new String(bodyBytes);
-
-        String req = header + body;
 
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
@@ -110,7 +104,27 @@ public class Test {
         connect(header);
     }
 
+    private static void chunkedTransferTest() throws Exception {
+        // Test with breakpoints
+        String req = "POST / HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "Transfer-Encoding: chunked\n" +
+                "Connection: close\n" +
+                "\n" +
+                "1a; ignore-stuff-here\r\n" +
+                "abcdefghijklmnopqrstuvwxyz\r\n" +
+                "10\r\n" +
+                "1234567890abcdef\r\n" +
+                "0\r\n" +
+                "footer1 : val1\r\n" +
+                "footer2: val2\r\n";
+        connect(req);
+    }
+
     public static void main(String[] args) throws Exception {
-        ifModifiedSinceTest();
+        chunkedTransferTest();
     }
 }

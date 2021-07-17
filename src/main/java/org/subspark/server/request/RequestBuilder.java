@@ -35,7 +35,11 @@ public class RequestBuilder {
         return request.header(key);
     }
 
-    public byte[] body() {
+    public String body() {
+        return request.body();
+    }
+
+    public byte[] bodyRaw() {
         return request.bodyRaw();
     }
 
