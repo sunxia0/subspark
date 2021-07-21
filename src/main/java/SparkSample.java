@@ -1,6 +1,3 @@
-package org.subspark;
-
-
 import static spark.Spark.*;
 
 public class SparkSample {

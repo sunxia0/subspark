@@ -1,42 +1,72 @@
-package org.subspark;
+package org.subspark.server;
 
+import org.junit.*;
 import org.subspark.server.io.HttpParser;
+import org.subspark.server.request.Method;
 import org.subspark.server.request.Request;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Test {
-    private static void testParseRequest() {
+public class ServerTest {
+    private WebService ws;
+
+    @Before
+    public void setUp() {
+        ws = new WebService();
+        ws.start();
+    }
+
+    @After
+    public void tearDown() {
+        ws.stop();
+    }
+
+    @Ignore
+    @Test
+    public void requestParsingTest() {
         String str = "GET /api/blog/get?id=1&mon=2&day=23 HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
                 "Accept: */*\n" +
                 "Referer: https://websniffer.cc/\n" +
-                "Connection: Close\n\n";
+                "Connection: close\n\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
         Request request = HttpParser.parseRequest(in).toRequest();
 
-        System.out.println(request.method());
-        System.out.println(request.path());
-        System.out.println(request.queryString());
-        System.out.println(request.uri());
-        System.out.println(request.protocol());
+        Assert.assertEquals(Method.GET, request.method());
+        Assert.assertEquals("/api/blog/get", request.path());
+        Assert.assertEquals("id=1&mon=2&day=23", request.queryString());
+        Assert.assertEquals("/api/blog/get?id=1&mon=2&day=23", request.uri());
+        Assert.assertEquals("HTTP/1.1", request.protocol());
 
-        System.out.println(request.queryParams());
+        Map<String, String> queryMap = new HashMap<>(){{
+            put("id", "1");
+            put("mon", "2");
+            put("day", "23");
+        }};
+        Assert.assertEquals(queryMap.keySet(), request.queryParams());
         for (String k : request.queryParams())
-            System.out.println(k + ": " + request.queryParam(k));
+            Assert.assertEquals(queryMap.get(k), request.queryParam(k));
 
-        System.out.println(request.headers());
+        Map<String, String> headerMap = new HashMap<>(){{
+           put("user-agent", "WebSniffer/1.0 (+http://websniffer.cc/)");
+           put("host", "localhost");
+           put("accept", "*/*");
+           put("referer", "https://websniffer.cc/");
+           put("connection", "close");
+        }};
+        Assert.assertEquals(headerMap.keySet(), request.headers());
         for (String k : request.headers())
-            System.out.println(k + ": " + request.header(k));
+            Assert.assertEquals(headerMap.get(k), request.header(k));
     }
 
-    private static void connect(String req) throws Exception {
+    private void connect(String req) throws Exception {
         Socket socket = new Socket("localhost", 8080);
 
         InputStream in = socket.getInputStream();
@@ -52,37 +82,54 @@ public class Test {
         }
     }
 
-    private static void getTest() throws Exception {
+    @Ignore
+    @Test
+    public void getTest() throws Exception {
         String header = "GET / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
                 "Accept: */*\n" +
                 "Referer: https://websniffer.cc/\n" +
                 "Connection: close\n\n";
+        System.out.println("===== Get Test =====");
         connect(header);
+        System.out.println("===== Get Test =====");
+        System.out.println();
     }
 
-    private static void headTest() throws Exception {
+    @Ignore
+    @Test
+    public void headTest() throws Exception {
         String header = "HEAD / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
                 "Accept: */*\n" +
                 "Referer: https://websniffer.cc/\n" +
                 "Connection: close\n\n";
+        System.out.println("===== Head Test =====");
         connect(header);
+        System.out.println("===== Head Test =====");
+        System.out.println();
     }
 
-    private static void absoluteURLTest() throws Exception {
+    @Ignore
+    @Test
+    public void absoluteURLTest() throws Exception {
         String header = "GET http://localhost:8080/ HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
                 "Accept: */*\n" +
                 "Referer: https://websniffer.cc/\n" +
                 "Connection: close\n\n";
+        System.out.println("===== Absolute URL Test =====");
         connect(header);
+        System.out.println("===== Absolute URL Test =====");
+        System.out.println();
     }
 
-    private static void ifModifiedSinceTest() throws Exception {
+    @Ignore
+    @Test
+    public void ifModifiedSinceTest() throws Exception {
         String header = "GET / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
@@ -90,10 +137,15 @@ public class Test {
                 "Referer: https://websniffer.cc/\n" +
                 "If-Modified-Since: Wed, 22 Jan 2021 19:10:41 GMT\n" +
                 "Connection: close\n\n";
+        System.out.println("===== If Modified Since Test =====");
         connect(header);
+        System.out.println("===== If Modified Since Test =====");
+        System.out.println();
     }
 
-    private static void ifUnModifiedSinceTest() throws Exception {
+    @Ignore
+    @Test
+    public void ifUnModifiedSinceTest() throws Exception {
         String header = "GET / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
@@ -101,10 +153,15 @@ public class Test {
                 "Referer: https://websniffer.cc/\n" +
                 "If-Unmodified-Since: Wed, 19 Jan 2021 19:10:41 GMT\n" +
                 "Connection: close\n\n";
+        System.out.println("===== If UnmodifiedSince Test =====");
         connect(header);
+        System.out.println("===== If UnmodifiedSince Test =====");
+        System.out.println();
     }
 
-    private static void chunkedTransferTest() throws Exception {
+    @Ignore
+    @Test
+    public void chunkedTransferTest() throws Exception {
         // Test with breakpoints
         String req = "POST / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
@@ -121,10 +178,9 @@ public class Test {
                 "0\r\n" +
                 "footer1 : val1\r\n" +
                 "footer2: val2\r\n";
+        System.out.println("===== Absolute URL Test =====");
         connect(req);
-    }
-
-    public static void main(String[] args) throws Exception {
-        chunkedTransferTest();
+        System.out.println("===== Absolute URL Test =====");
+        System.out.println();
     }
 }

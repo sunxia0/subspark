@@ -1,5 +1,3 @@
-package org.subspark;
-
 import static org.subspark.SubSpark.*;
 
 import org.apache.logging.log4j.Level;

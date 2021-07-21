@@ -8,6 +8,11 @@ public class HaltException extends RuntimeException {
     private final Status status;
     private final String message;
 
+    public HaltException() {
+        this.status = Status.INTERNAL_SERVER_ERROR;
+        this.message = this.status.description();
+    }
+
     public HaltException(Status status) {
         this.status = status;
         this.message = status.description();

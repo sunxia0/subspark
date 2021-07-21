@@ -28,6 +28,10 @@ public class BioHttpHandler {
         this.executor = Executors.newFixedThreadPool(service.threadPool());
     }
 
+    public void shutdown() {
+        executor.shutdownNow();
+    }
+
     public void handle(Socket socket) {
         executor.execute(new HttpTask(socket));
     }

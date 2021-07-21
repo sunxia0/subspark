@@ -9,10 +9,8 @@ import org.subspark.server.request.Method;
 import org.subspark.server.request.Request;
 import org.subspark.server.response.ResponseBuilder;
 import org.subspark.server.response.Status;
-import org.subspark.util.DateUtils;
-import org.subspark.util.FileUtils;
-
-import java.text.ParseException;
+import org.subspark.server.util.DateUtils;
+import org.subspark.server.util.FileUtils;
 
 public class StaticFilesHandler {
     private final static Logger logger = LogManager.getLogger(StaticFilesHandler.class);

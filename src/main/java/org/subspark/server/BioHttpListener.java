@@ -42,7 +42,12 @@ public class BioHttpListener implements Runnable {
     }
 
     public void stop() {
-        listenThread.interrupt();
+        try {
+            listenThread.interrupt();
+            listenThread.join();
+        } catch (InterruptedException e) {
+            logger.error("An error occurred when terminating the listener");
+        }
     }
 
     @Override

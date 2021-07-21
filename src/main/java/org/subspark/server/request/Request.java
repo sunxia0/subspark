@@ -70,7 +70,7 @@ public class Request {
      */
     public String path() {
         return path;
-    };
+    }
 
     /**
      * @return The URI up to the query string
@@ -216,14 +216,14 @@ public class Request {
 //        return null;
 //    }
 //
-//    public Map<String, String> cookies() {
-//        return null;
-//    }
-//
-//    public String cookie(String name) {
-//        if (name == null || cookies() == null)
-//            return null;
-//        else
-//            return cookies().get(name);
-//    }
+    public Map<String, String> cookies() {
+        return null;
+    }
+
+    public String cookie(String name) {
+        if (name == null || cookies() == null)
+            return null;
+        else
+            return cookies().get(name);
+    }
 }

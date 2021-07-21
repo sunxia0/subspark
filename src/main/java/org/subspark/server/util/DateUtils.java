@@ -1,4 +1,4 @@
-package org.subspark.util;
+package org.subspark.server.util;
 
 
 import java.text.ParseException;
