@@ -8,10 +8,10 @@ import java.util.Map;
 public class Response {
     private String protocolVersion;
     private Status status;
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
     private byte[] body;
 
-    Response() {
+    protected Response() {
         this.headers = new HashMap<>();
     }
 
@@ -65,55 +65,5 @@ public class Response {
         for (Map.Entry<String, String> e : headers.entrySet())
             sb.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
         return sb.toString();
-    }
-
-    // ============ for stage 2 ============
-    
-    public void redirect(String location) {
-        
-    }
-
-    public void redirect(String location, int httpStatusCode) {
-
-    }
-
-    public void cookie(String name, String value) {
-
-    }
-
-    public void cookie(String name, String value, int maxAge) {
-
-    }
-
-    public void cookie(String name, String value, int maxAge, boolean secured) {
-
-    }
-
-    public void cookie(String name, String value, int maxAge, boolean secured, boolean httpOnly) {
-
-    }
-
-    public void cookie(String path, String name, String value) {
-
-    }
-
-    public void cookie(String path, String name, String value, int maxAge) {
-
-    }
-
-    public void cookie(String path, String name, String value, int maxAge, boolean secured) {
-
-    }
-
-    public void cookie(String path, String name, String value, int maxAge, boolean secured, boolean httpOnly) {
-
-    }
-
-    public void removeCookie(String name) {
-
-    }
-
-    public void removeCookie(String path, String name) {
-
     }
 }

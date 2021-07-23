@@ -1,4 +1,4 @@
-package org.subspark.server.util;
+package org.subspark.server.utils;
 
 
 import org.subspark.server.exceptions.HaltException;

@@ -80,6 +80,7 @@ public class ServerTest {
         while ((readBytes = in.read(bytes)) > 0) {
             System.out.print(new String(bytes, 0, readBytes));
         }
+        System.out.println();
     }
 
     @Ignore

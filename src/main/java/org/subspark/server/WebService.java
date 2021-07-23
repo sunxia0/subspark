@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.subspark.server.handling.RequestHandler;
 import org.subspark.server.handling.StaticFilesHandler;
 import org.subspark.server.io.BioHttpHandler;
+import org.subspark.server.listener.BioHttpListener;
 
 
 public class WebService {
@@ -43,6 +44,13 @@ public class WebService {
         return staticFilesHandler;
     }
 
+    protected WebService() {}
+
+    public static void main(String[] args) {
+        WebService ws = new WebService();
+        ws.start();
+    }
+
     /**
      * Launches the Web server thread pool and the listener
      */
@@ -54,6 +62,7 @@ public class WebService {
 
         this.staticFilesHandler.staticFileLocation(staticFileLocation);
         this.listener.listen();
+        logger.info("WebService has started");
     }
 
     /**
@@ -62,6 +71,7 @@ public class WebService {
     public void stop() {
         this.listener.stop();
         this.ioHandler.shutdown();
+        logger.info("WebService has stopped");
     }
 
     /**

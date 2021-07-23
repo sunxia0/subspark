@@ -1,9 +1,7 @@
 package org.subspark.server.request;
 
-import org.subspark.server.Session;
 
 import java.util.*;
-
 
 public class Request {
     private Method method;
@@ -11,12 +9,12 @@ public class Request {
     private String queryString;
     private String uri;
     private String protocolVersion;
-    private Map<String, String> queryParams;
-    private Map<String, String> headers;
+    private final Map<String, String> queryParams;
+    private final Map<String, String> headers;
     private String body;
     private byte[] bodyRaw;
 
-    Request () {
+    protected Request () {
         this.queryParams = new HashMap<>();
         this.headers = new HashMap<>();
     }
@@ -164,66 +162,5 @@ public class Request {
      */
     public byte[] bodyRaw() {
         return bodyRaw;
-    }
-
-//    // ============ for stage 2 ============
-//
-//    /**
-//     * @return Gets the session associated with this request
-//     */
-//    public Session session() {
-//        return null;
-//    }
-//
-//    /**
-//     * @return a map containing the route parameters
-//     */
-//    public Map<String, String> params() {
-//        return null;
-//    }
-//
-//    /**
-//     * @return the named parameter Example: parameter 'name' from the following
-//     *         pattern: (get '/hello/:name')
-//     */
-//    public String params(String param) {
-//        if (param == null)
-//            return null;
-//
-//        if (param.startsWith(":"))
-//            return params().get(param.toLowerCase());
-//        else
-//            return params().get(':' + param.toLowerCase());
-//    }
-//
-//    /**
-//     * Add an attribute to the request (eg in a filter)
-//     */
-//    public void attribute(String attrib, Object val) {
-//    }
-//
-//    /**
-//     * @return Gets an attribute attached to the request
-//     */
-//    public Object attribute(String attrib) {
-//        return null;
-//    }
-//
-//    /**
-//     * @return All attributes attached to the request
-//     */
-//    public Set<String> attributes() {
-//        return null;
-//    }
-//
-    public Map<String, String> cookies() {
-        return null;
-    }
-
-    public String cookie(String name) {
-        if (name == null || cookies() == null)
-            return null;
-        else
-            return cookies().get(name);
     }
 }

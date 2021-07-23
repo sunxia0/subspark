@@ -1,6 +1,6 @@
 package org.subspark.server.response;
 
-import org.subspark.server.util.DateUtils;
+import org.subspark.server.utils.DateUtils;
 
 public class ResponseBuilder {
     public static final String HTTP_1_0 = "HTTP/1.0";

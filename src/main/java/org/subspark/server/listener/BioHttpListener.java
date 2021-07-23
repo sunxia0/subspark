@@ -1,17 +1,15 @@
-package org.subspark.server;
+package org.subspark.server.listener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.subspark.server.WebService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/**
- * Stub for your HTTP server, which listens on a ServerSocket and handles
- * requests
- */
+
 public class BioHttpListener implements Runnable {
     private final static Logger logger = LogManager.getLogger(BioHttpListener.class);
 
@@ -43,30 +41,34 @@ public class BioHttpListener implements Runnable {
 
     public void stop() {
         try {
-            listenThread.interrupt();
+            serverSocket.close();
             listenThread.join();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             logger.error("An error occurred when terminating the listener");
         }
     }
 
     @Override
     public void run() {
-        try {
-            logger.info(String.format("Server starts listening on %s:%d",
-                    service.ipAddress(), service.port()));
+        logger.info(String.format("Server starts listening on %s:%d",
+                service.ipAddress(), service.port()));
 
-            while (!Thread.interrupted()) {
-                Socket socket = serverSocket.accept();
+        while (true) {
+            Socket socket;
 
-                logger.info(String.format("Open socket connection - %s:%d",
-                        socket.getInetAddress().getHostName(), socket.getPort()));
-
-                service.getIOHandler().handle(socket);
+            try {
+                socket = serverSocket.accept();
+            } catch (IOException e) {
+                break;
             }
-        } catch (IOException e) {
-            logger.error("An error occurred when accepting socket", e);
-        } finally {
+
+            logger.info(String.format("Open socket connection - %s:%d",
+                    socket.getInetAddress().getHostName(), socket.getPort()));
+
+            service.getIOHandler().handle(socket);
+        }
+
+        if (!serverSocket.isClosed()) {
             try {
                 serverSocket.close();
             } catch (IOException e) {

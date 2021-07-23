@@ -12,6 +12,8 @@ import org.subspark.server.response.Status;
 public class Service extends WebService {
     private final static Logger logger = LogManager.getLogger(Service.class);
 
+    protected Service() {}
+
     /**
      * Triggers a HaltException that terminates the request
      */

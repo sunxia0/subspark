@@ -77,7 +77,8 @@ public class BioHttpHandler {
                     if (response == null || response.header("connection").equals(ResponseBuilder.CONNECTION_CLOSE)) {
                         try {
                             socket.close();
-                            logger.info("Socket connection closed");
+                            logger.info(String.format("Close socket connection - %s:%d",
+                                    socket.getInetAddress().getHostName(), socket.getPort()));
                         } catch (IOException e) {
                             logger.error("An error occurred when closing socket", e);
                         }

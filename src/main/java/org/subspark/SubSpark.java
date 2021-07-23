@@ -2,9 +2,6 @@ package org.subspark;
 
 import org.subspark.route.Route;
 import org.subspark.filter.Filter;
-import org.subspark.server.Session;
-
-import org.subspark.server.WebService;
 import org.subspark.server.exceptions.HaltException;
 
 public class SubSpark {
@@ -112,7 +109,7 @@ public class SubSpark {
     }
 
     /**
-     * Set the port to listen on (default 45555)
+     * Set the port to listen on (default 8080)
      */
     public static void port(int port) {
         getInstance().port(port);
@@ -154,11 +151,11 @@ public class SubSpark {
         throw new UnsupportedOperationException();
     }
 
-    private static WebService getInstance() {
-        return WebServiceHolder.INSTANCE;
+    private static Service getInstance() {
+        return ServiceHolder.INSTANCE;
     }
 
-    private static class WebServiceHolder {
-        private static final WebService INSTANCE = new WebService();
+    private static class ServiceHolder {
+        private static final Service INSTANCE = new Service();
     }
 }
