@@ -3,7 +3,7 @@ package org.subspark.server.request;
 
 import java.util.*;
 
-public class Request {
+public class HttpRequest {
     private Method method;
     private String path;
     private String queryString;
@@ -14,7 +14,7 @@ public class Request {
     private String body;
     private byte[] bodyRaw;
 
-    protected Request () {
+    protected HttpRequest() {
         this.queryParams = new HashMap<>();
         this.headers = new HashMap<>();
     }

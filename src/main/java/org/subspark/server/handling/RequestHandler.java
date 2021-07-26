@@ -6,10 +6,10 @@ import org.apache.logging.log4j.Logger;
 import org.subspark.server.WebService;
 import org.subspark.server.common.MimeType;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.request.Request;
-import org.subspark.server.request.RequestBuilder;
-import org.subspark.server.response.Response;
-import org.subspark.server.response.ResponseBuilder;
+import org.subspark.server.request.HttpRequest;
+import org.subspark.server.request.HttpRequestBuilder;
+import org.subspark.server.response.HttpResponse;
+import org.subspark.server.response.HttpResponseBuilder;
 import org.subspark.server.response.Status;
 
 import java.io.BufferedReader;
@@ -39,7 +39,7 @@ public class RequestHandler {
      * If the request used chunked transfer, substitute the
      * chunked body with merged body
      */
-    private void mergeChunkedBody(RequestBuilder requestBuilder) throws HaltException {
+    private void mergeChunkedBody(HttpRequestBuilder requestBuilder) throws HaltException {
         String transferEncoding = requestBuilder.header("transfer-encoding");
         byte[] bodyRaw = requestBuilder.bodyRaw();
 
@@ -107,7 +107,7 @@ public class RequestHandler {
     /**
      * Handle absolute URL, and substitute it with relative URL
      */
-    private void checkAbsoluteURL(RequestBuilder requestBuilder) throws HaltException {
+    private void checkAbsoluteURL(HttpRequestBuilder requestBuilder) throws HaltException {
         Matcher uriMatcher = URLPattern.matcher(requestBuilder.uri());
 
         if (!uriMatcher.find())
@@ -128,14 +128,14 @@ public class RequestHandler {
     }
 
     // TODO: add route support (use staticFilesHandler to handle all requests now)
-    public Response handleRequest(RequestBuilder requestBuilder) throws HaltException {
+    public HttpResponse handleRequest(HttpRequestBuilder requestBuilder) throws HaltException {
         mergeChunkedBody(requestBuilder);
         checkAbsoluteURL(requestBuilder);
-        Request request = requestBuilder.toRequest();
+        HttpRequest request = requestBuilder.toRequest();
 
         checkSpecification(request);
 
-        ResponseBuilder responseBuilder = service.getStaticFilesHandler().consumeFileRequest(request);
+        HttpResponseBuilder responseBuilder = service.getStaticFilesHandler().consumeFileRequest(request);
 
         if (!isKeepAlive(request))
             responseBuilder.header("connection", "close");
@@ -143,8 +143,8 @@ public class RequestHandler {
         return responseBuilder.toResponse();
     }
 
-    public Response handleException(HaltException exception) {
-        ResponseBuilder builder = new ResponseBuilder();
+    public HttpResponse handleException(HaltException exception) {
+        HttpResponseBuilder builder = new HttpResponseBuilder();
 
         builder.status(exception.getStatus())
                 .header("content-type", MimeType.TXT)
@@ -162,7 +162,7 @@ public class RequestHandler {
     /**
      * Check the specification of request
      */
-    private static void checkSpecification(Request request) throws HaltException {
+    private static void checkSpecification(HttpRequest request) throws HaltException {
         // Invalid HTTP verb
         if (request.method() == null)
             throw new HaltException(Status.BAD_REQUEST);
@@ -172,17 +172,17 @@ public class RequestHandler {
             throw new HaltException(Status.BAD_REQUEST);
 
         // Check `host` header for HTTP/1.1
-        if (request.protocol().equals(ResponseBuilder.HTTP_1_1) && request.header("host") == null)
+        if (request.protocol().equals("HTTP/1.1") && request.header("host") == null)
             throw new HaltException(Status.BAD_REQUEST);
     }
 
     /**
      * Check `connection` header and return whether the connection is persistent
      */
-    private static boolean isKeepAlive(Request request) {
+    private static boolean isKeepAlive(HttpRequest request) {
         String protocolVersion = request.protocol();
         String connection = request.header("connection");
-        return protocolVersion.equals(ResponseBuilder.HTTP_1_1)
-                && (connection == null || connection.equals(ResponseBuilder.CONNECTION_KEEP_ALIVE));
+        return protocolVersion.equals("HTTP/1.1")
+                && (connection == null || connection.equals(HttpResponseBuilder.CONNECTION_KEEP_ALIVE));
     }
 }

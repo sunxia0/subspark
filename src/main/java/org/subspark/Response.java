@@ -1,6 +1,8 @@
 package org.subspark;
 
-public class Response extends org.subspark.server.response.Response {
+import org.subspark.server.response.HttpResponse;
+
+public class Response extends HttpResponse {
     protected Response() {
         super();
     }

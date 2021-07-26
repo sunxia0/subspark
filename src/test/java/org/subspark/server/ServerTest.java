@@ -3,7 +3,7 @@ package org.subspark.server;
 import org.junit.*;
 import org.subspark.server.io.HttpParser;
 import org.subspark.server.request.Method;
-import org.subspark.server.request.Request;
+import org.subspark.server.request.HttpRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -37,7 +37,7 @@ public class ServerTest {
                 "Connection: close\n\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        Request request = HttpParser.parseRequest(in).toRequest();
+        HttpRequest request = HttpParser.parseRequest(in).toRequest();
 
         Assert.assertEquals(Method.GET, request.method());
         Assert.assertEquals("/api/blog/get", request.path());

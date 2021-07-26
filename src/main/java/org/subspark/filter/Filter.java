@@ -1,7 +1,7 @@
 package org.subspark.filter;
 
-import org.subspark.server.request.Request;
-import org.subspark.server.response.Response;
+import org.subspark.server.request.HttpRequest;
+import org.subspark.server.response.HttpResponse;
 
 /**
  * A Filter is called by the Web server to process data before or after the
@@ -10,5 +10,5 @@ import org.subspark.server.response.Response;
  */
 @FunctionalInterface
 public interface Filter {
-    void handle(Request request, Response response) throws Exception;
+    void handle(HttpRequest request, HttpResponse response) throws Exception;
 }

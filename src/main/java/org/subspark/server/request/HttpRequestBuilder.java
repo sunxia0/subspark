@@ -1,10 +1,10 @@
 package org.subspark.server.request;
 
-public class RequestBuilder {
-    private final Request request;
+public class HttpRequestBuilder {
+    private final HttpRequest request;
 
-    public RequestBuilder() {
-        this.request = new Request();
+    public HttpRequestBuilder() {
+        this.request = new HttpRequest();
     }
 
     public Method method() {
@@ -43,47 +43,47 @@ public class RequestBuilder {
         return request.bodyRaw();
     }
 
-    public RequestBuilder method(String method) {
+    public HttpRequestBuilder method(String method) {
         request.method(method);
         return this;
     }
 
-    public RequestBuilder path(String path) {
+    public HttpRequestBuilder path(String path) {
         request.path(path);
         return this;
     }
 
-    public RequestBuilder queryString(String queryString) {
+    public HttpRequestBuilder queryString(String queryString) {
         request.queryString(queryString);
         return this;
     }
 
-    public RequestBuilder uri(String uri) {
+    public HttpRequestBuilder uri(String uri) {
         request.uri(uri);
         return this;
     }
 
-    public RequestBuilder protocol(String protocolVersion) {
+    public HttpRequestBuilder protocol(String protocolVersion) {
         request.protocol(protocolVersion);
         return this;
     }
 
-    public RequestBuilder queryParam(String key, String value) {
+    public HttpRequestBuilder queryParam(String key, String value) {
         request.queryParam(key, value);
         return this;
     }
 
-    public RequestBuilder header(String key, String value) {
+    public HttpRequestBuilder header(String key, String value) {
         request.header(key, value);
         return this;
     }
 
-    public RequestBuilder body(byte[] bodyRaw) {
+    public HttpRequestBuilder body(byte[] bodyRaw) {
         request.body(bodyRaw);
         return this;
     }
 
-    public Request toRequest() {
+    public HttpRequest toRequest() {
         return request;
     }
 }

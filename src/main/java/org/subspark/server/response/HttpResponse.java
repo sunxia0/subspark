@@ -5,13 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Response {
+public class HttpResponse {
     private String protocolVersion;
     private Status status;
     private final Map<String, String> headers;
     private byte[] body;
 
-    protected Response() {
+    protected HttpResponse() {
         this.headers = new HashMap<>();
     }
 

@@ -1,9 +1,11 @@
 package org.subspark;
 
+import org.subspark.server.request.HttpRequest;
+
 import java.util.Map;
 import java.util.Set;
 
-public class Request extends org.subspark.server.request.Request {
+public class Request extends HttpRequest {
     protected Request () {
         super();
     }

@@ -6,8 +6,8 @@ import org.subspark.server.WebService;
 import org.subspark.server.common.MimeType;
 import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.request.Method;
-import org.subspark.server.request.Request;
-import org.subspark.server.response.ResponseBuilder;
+import org.subspark.server.request.HttpRequest;
+import org.subspark.server.response.HttpResponseBuilder;
 import org.subspark.server.response.Status;
 import org.subspark.server.utils.DateUtils;
 import org.subspark.server.utils.FileUtils;
@@ -27,16 +27,18 @@ public class StaticFilesHandler {
         this.staticFileLocation = staticFileLocation;
     }
 
-    public ResponseBuilder consumeFileRequest(Request request) throws HaltException {
+    public HttpResponseBuilder consumeFileRequest(HttpRequest request) throws HaltException {
         Method method = request.method();
-        if (method != Method.GET && method != Method.HEAD)
-            throw new HaltException(Status.METHOD_NOT_ALLOWED);
+        if (method != Method.GET && method != Method.HEAD) {
+            throw new HaltException(request.protocol().equals("HTTP/1.1") ?
+                    Status.METHOD_NOT_ALLOWED : Status.BAD_REQUEST);
+        }
 
         String fullPath = FileUtils.getFullPath(staticFileLocation, request.path());
         if (!FileUtils.fileExists(fullPath))
             throw new HaltException(Status.NOT_FOUND);
 
-        ResponseBuilder builder = new ResponseBuilder();
+        HttpResponseBuilder builder = new HttpResponseBuilder();
         builder.protocol(request.protocol());
 
         long lastModified = FileUtils.getLastModified(fullPath);

@@ -36,9 +36,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.subspark.server.exceptions.ClosedConnectionException;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.request.Request;
-import org.subspark.server.request.RequestBuilder;
-import org.subspark.server.response.Response;
+import org.subspark.server.request.HttpRequestBuilder;
+import org.subspark.server.response.HttpResponse;
 import org.subspark.server.response.Status;
 
 import java.io.*;
@@ -100,7 +99,7 @@ public class HttpParser {
     /**
      * Decode each k/v of request query string
      */
-    private static void decodeQueryString(RequestBuilder builder, String queryString) throws HaltException {
+    private static void decodeQueryString(HttpRequestBuilder builder, String queryString) throws HaltException {
         StringTokenizer tokenizer = new StringTokenizer(queryString, "&");
         String pair;
         int sep;
@@ -120,7 +119,7 @@ public class HttpParser {
     /**
      * Decode request header
      */
-    private static void decodeRequestHeader(RequestBuilder builder, BufferedReader headerBuffer) throws HaltException {
+    private static void decodeRequestHeader(HttpRequestBuilder builder, BufferedReader headerBuffer) throws HaltException {
         try {
             // Request line
             String requestLine = headerBuffer.readLine();
@@ -210,8 +209,8 @@ public class HttpParser {
     /**
      * Parse InputStream and create Request object
      */
-    public static RequestBuilder parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
-        RequestBuilder builder = new RequestBuilder();
+    public static HttpRequestBuilder parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
+        HttpRequestBuilder builder = new HttpRequestBuilder();
 
         // Enable mark/reset support
         BufferedInputStream bufferedIn = new BufferedInputStream(in, BUFFER_SIZE);
@@ -289,7 +288,7 @@ public class HttpParser {
         return builder;
     }
 
-    public static void sendResponse(OutputStream out, Response response) throws ClosedConnectionException {
+    public static void sendResponse(OutputStream out, HttpResponse response) throws ClosedConnectionException {
         try {
             String statusLine = response.protocol() + " " + response.statusDescription() + "\r\n";
             String headers = response.headers();
