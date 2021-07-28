@@ -2,8 +2,8 @@ package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.filter.Filter;
-import org.subspark.route.Route;
+import org.subspark.server.filter.Filter;
+import org.subspark.server.route.Route;
 import org.subspark.server.WebService;
 import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.response.Status;

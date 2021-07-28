@@ -1,7 +1,8 @@
 package org.subspark;
 
-import org.subspark.route.Route;
-import org.subspark.filter.Filter;
+import org.subspark.server.Session;
+import org.subspark.server.route.Route;
+import org.subspark.server.filter.Filter;
 import org.subspark.server.exceptions.HaltException;
 
 public class SubSpark {

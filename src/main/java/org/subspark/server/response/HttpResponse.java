@@ -16,7 +16,7 @@ public class HttpResponse {
     }
 
     // Can't be set by user
-    void protocol(String protocolVersion) {
+    protected void protocol(String protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 

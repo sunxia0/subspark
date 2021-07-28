@@ -1,4 +1,4 @@
-package org.subspark.route;
+package org.subspark.server.route;
 
 import org.subspark.server.request.HttpRequest;
 import org.subspark.server.response.HttpResponse;

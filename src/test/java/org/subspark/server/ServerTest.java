@@ -163,8 +163,7 @@ public class ServerTest {
     @Ignore
     @Test
     public void chunkedTransferTest() throws Exception {
-        // Test with breakpoints
-        String req = "POST / HTTP/1.1\n" +
+        String str = "POST / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
                 "Accept: */*\n" +
@@ -179,9 +178,34 @@ public class ServerTest {
                 "0\r\n" +
                 "footer1 : val1\r\n" +
                 "footer2: val2\r\n";
-        System.out.println("===== Absolute URL Test =====");
-        connect(req);
-        System.out.println("===== Absolute URL Test =====");
-        System.out.println();
+
+        ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
+        HttpRequest request = HttpParser.parseRequest(in).toRequest();
+
+        Assert.assertEquals("abcdefghijklmnopqrstuvwxyz1234567890abcdef", request.body());
+        Assert.assertEquals("val1", request.header("footer1"));
+        Assert.assertEquals("val2", request.header("footer2"));
+    }
+
+    @Ignore
+    @Test
+    public void cookiesGenerateTest() {
+        String str = "GET /api/blog/get?id=1&mon=2&day=23 HTTP/1.1\n" +
+                "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
+                "Host: localhost\n" +
+                "Accept: */*\n" +
+                "Referer: https://websniffer.cc/\n" +
+                "Cookie: PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;\n" +
+                "Connection: close\n\n";
+
+        ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
+        HttpRequest request = HttpParser.parseRequest(in).toRequest();
+
+        Map<String, String> cookies = new HashMap<>(){{
+           put("PHPSESSID", "298zf09hf012fh2");
+           put("csrftoken", "u32t4o3tb3gg43");
+           put("_gat", "1");
+        }};
+        Assert.assertEquals(cookies, request.cookies());
     }
 }

@@ -1,5 +1,7 @@
 package org.subspark.server.request;
 
+import java.util.Map;
+
 public class HttpRequestBuilder {
     private final HttpRequest request;
 
@@ -75,6 +77,11 @@ public class HttpRequestBuilder {
 
     public HttpRequestBuilder header(String key, String value) {
         request.header(key, value);
+        return this;
+    }
+
+    public HttpRequestBuilder cookiesHolder(Map<String, String> cookiesHolder) {
+        request.cookiesHolder(cookiesHolder);
         return this;
     }
 

@@ -13,10 +13,35 @@ public class Request extends HttpRequest {
     // ============ for stage 2 ============
 
     /**
-     * @return Gets the session associated with this request
+     * @return The header "host"
      */
-    public Session session() {
-        return null;
+    public String host() {
+        return header("host");
+    }
+
+    /**
+     * @return The header "user-agent"
+     */
+    public String userAgent() {
+        return header("user-agent");
+    }
+
+    /**
+     * @return The header "content-type"
+     */
+    public String contentType() {
+        return header("content-type");
+    }
+
+    /**
+     * @return The header "content-length"
+     */
+    public int contentLength() {
+        try {
+            return Integer.parseInt(header("content-length"));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     /**
@@ -58,16 +83,5 @@ public class Request extends HttpRequest {
      */
     public Set<String> attributes() {
         return null;
-    }
-
-    public Map<String, String> cookies() {
-        return null;
-    }
-
-    public String cookie(String name) {
-        if (name == null || cookies() == null)
-            return null;
-        else
-            return cookies().get(name);
     }
 }

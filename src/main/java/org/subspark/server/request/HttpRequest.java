@@ -1,6 +1,8 @@
 package org.subspark.server.request;
 
 
+import org.subspark.server.Session;
+
 import java.util.*;
 
 public class HttpRequest {
@@ -11,6 +13,7 @@ public class HttpRequest {
     private String protocolVersion;
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
+    private Map<String, String> cookiesHolder;
     private String body;
     private byte[] bodyRaw;
 
@@ -20,38 +23,41 @@ public class HttpRequest {
     }
 
     /**
-     * ======= Setters only for RequestBuilder (package visible) ======
+     * ======= Setters only for RequestBuilder and sub class ======
      */
-
-    void method(String method) {
+    protected void method(String method) {
         this.method = Method.fromString(method);
     }
 
-    void path(String path) {
+    protected void path(String path) {
         this.path = path;
     }
 
-    void queryString(String queryString) {
+    protected void queryString(String queryString) {
         this.queryString = queryString;
     }
 
-    void uri(String uri) {
+    protected void uri(String uri) {
         this.uri = uri;
     }
 
-    void protocol(String protocolVersion) {
+    protected void protocol(String protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
-    void queryParam(String key, String value) {
+    protected void queryParam(String key, String value) {
         this.queryParams.put(key, value);
     }
 
-    void header(String key, String value) {
+    protected void cookiesHolder(Map<String, String> cookiesHolder) {
+        this.cookiesHolder =cookiesHolder;
+    }
+
+    protected void header(String key, String value) {
         this.headers.put(key, value);
     }
 
-    void body(byte[] bodyRaw) {
+    protected void body(byte[] bodyRaw) {
         this.bodyRaw = bodyRaw;
         this.body = new String(this.bodyRaw);
     }
@@ -108,38 +114,6 @@ public class HttpRequest {
     }
 
     /**
-     * @return The header "host"
-     */
-    public String host() {
-        return headers.get("host");
-    }
-
-    /**
-     * @return The header "user-agent"
-     */
-    public String userAgent() {
-        return headers.get("user-agent");
-    }
-
-    /**
-     * @return The header "content-type"
-     */
-    public String contentType() {
-        return headers.get("content-type");
-    }
-
-    /**
-     * @return The header "content-length"
-     */
-    public int contentLength() {
-        try {
-            return Integer.parseInt(headers.get("content-length"));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    /**
      * @return Get the item from the header
      */
     public String header(String name) {
@@ -162,5 +136,23 @@ public class HttpRequest {
      */
     public byte[] bodyRaw() {
         return bodyRaw;
+    }
+
+    /**
+     * @return Gets the session associated with this request
+     */
+    public Session session() {
+        return null;
+    }
+
+    public Map<String, String> cookies() {
+        return cookiesHolder;
+    }
+
+    public String cookie(String name) {
+        if (name == null || cookies() == null)
+            return null;
+        else
+            return cookies().get(name);
     }
 }

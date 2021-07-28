@@ -43,9 +43,7 @@ import org.subspark.server.response.Status;
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 
 /**
@@ -207,6 +205,101 @@ public class HttpParser {
     }
 
     /**
+     * Check `Cookie` header and create Map for the request
+     */
+    private static void generateCookiesHolder(HttpRequestBuilder builder) throws HaltException {
+        String cookies = builder.header("cookie");
+
+        if (cookies != null) {
+            Map<String, String> cookiesHolder = new HashMap<>();
+            String[] kvs = cookies.split(";");
+
+            int sep;
+            for (String kv : kvs) {
+                kv = kv.trim();
+                if (kv.length() > 0) {
+                    sep = kv.indexOf("=");
+                    if (sep == -1)
+                        throw new HaltException(Status.BAD_REQUEST);
+                    cookiesHolder.put(kv.substring(0, sep), kv.substring(sep + 1));
+                }
+            }
+
+            builder.cookiesHolder(cookiesHolder);
+        }
+    }
+
+    /**
+     * Check `Transfer-Encoding` header.
+     * If the request used chunked transfer, substitute the
+     * chunked body with merged body
+     */
+    private static void mergeChunkedBody(HttpRequestBuilder builder) throws HaltException {
+        String transferEncoding = builder.header("transfer-encoding");
+        byte[] bodyRaw = builder.bodyRaw();
+
+        if (transferEncoding != null && transferEncoding.equals("chunked") && bodyRaw.length > 0) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bodyRaw)));
+            boolean bodyEnd = false;
+            String line, nextLine, key = null;
+            int sep, lineLength, fullLength = 0;
+            List<byte[]> chunks = new ArrayList<>();
+
+            try {
+                while ((line = reader.readLine()) != null) {
+                    if (!bodyEnd) {
+                        // Check semicolon
+                        sep = line.indexOf(";");
+                        if (sep != -1)
+                            line = line.substring(0, sep);
+
+                        try {
+                            lineLength = Integer.parseInt(line, 16);
+                            fullLength += lineLength;
+                        } catch (NumberFormatException e) {
+                            throw new HaltException(Status.BAD_REQUEST);
+                        }
+
+                        if (lineLength == 0) {
+                            bodyEnd = true;
+
+                            // Merge chunks
+                            byte[] merged = new byte[fullLength];
+                            int start = 0;
+                            for (byte[] chunk : chunks) {
+                                System.arraycopy(chunk, 0, merged, start, chunk.length);
+                                start += chunk.length;
+                            }
+                            builder.body(merged);
+                        }
+                        else {
+                            nextLine = reader.readLine();
+                            if (nextLine == null) {
+                                throw new HaltException(Status.BAD_REQUEST, "Unclosed chunked body!");
+                            }
+                            chunks.add(nextLine.getBytes());
+                        }
+                    }
+                    else {
+                        // Parse footers like headers
+                        sep = line.indexOf(":");
+
+                        if (sep > 0) {
+                            key = line.substring(0, sep).trim().toLowerCase();
+                            builder.header(key, line.substring(sep + 1).trim());
+                        }
+                        else if (key != null && (line.startsWith(" ") || line.startsWith("\t"))) {
+                            builder.header(key, builder.header(key) + line.trim());
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new HaltException(Status.INTERNAL_SERVER_ERROR, "An error occurred when parsing chunked request.");
+            }
+        }
+    }
+
+    /**
      * Parse InputStream and create Request object
      */
     public static HttpRequestBuilder parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
@@ -281,6 +374,10 @@ public class HttpParser {
             }
 
             builder.body(assembleRequestBody(bodyBuffer));
+
+            generateCookiesHolder(builder);
+
+            mergeChunkedBody(builder);
         } catch (IOException e) {
             throw new ClosedConnectionException();
         }

@@ -1,4 +1,4 @@
-package org.subspark.filter;
+package org.subspark.server.filter;
 
 import org.subspark.server.request.HttpRequest;
 import org.subspark.server.response.HttpResponse;
