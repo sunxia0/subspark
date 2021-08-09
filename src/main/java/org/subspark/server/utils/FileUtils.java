@@ -2,7 +2,7 @@ package org.subspark.server.utils;
 
 
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.response.Status;
+import org.subspark.server.http.Status;
 
 import java.io.*;
 import java.util.StringTokenizer;

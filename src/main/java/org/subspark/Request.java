@@ -1,6 +1,6 @@
 package org.subspark;
 
-import org.subspark.server.request.HttpRequest;
+import org.subspark.server.HttpRequest;
 
 import java.util.Map;
 import java.util.Set;

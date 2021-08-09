@@ -30,15 +30,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.subspark.server.io;
+package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.subspark.server.exceptions.ClosedConnectionException;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.request.HttpRequestBuilder;
-import org.subspark.server.response.HttpResponse;
-import org.subspark.server.response.Status;
+import org.subspark.server.http.Status;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -97,7 +95,7 @@ public class HttpParser {
     /**
      * Decode each k/v of request query string
      */
-    private static void decodeQueryString(HttpRequestBuilder builder, String queryString) throws HaltException {
+    private static void decodeQueryString(HttpRequest request, String queryString) throws HaltException {
         StringTokenizer tokenizer = new StringTokenizer(queryString, "&");
         String pair;
         int sep;
@@ -110,14 +108,33 @@ public class HttpParser {
                 throw new HaltException(Status.BAD_REQUEST);
 
             // The value of the next parameter with the same name will override the value of the previous one
-            builder.queryParam(decodePercent(pair.substring(0, sep)), decodePercent(pair.substring(sep + 1)));
+            request.queryParam(decodePercent(pair.substring(0, sep)), decodePercent(pair.substring(sep + 1)));
         }
+    }
+
+    /**
+     * Parse a head line and create k/v pair, return the current key
+     */
+    private static String parseHeadline(HttpRequest request, String headerLine, String key) {
+        int sep = headerLine.indexOf(":");
+
+        // Use trim() to ignore possible spaces and tabs
+        // Consider header value written in multiple lines
+        if (sep > 0) {
+            key = headerLine.substring(0, sep).trim().toLowerCase();
+            request.header(key, headerLine.substring(sep + 1).trim());
+        }
+        else if (key != null && (headerLine.startsWith(" ") || headerLine.startsWith("\t"))) {
+            request.header(key, request.header(key) + headerLine.trim());
+        }
+
+        return key;
     }
 
     /**
      * Decode request header
      */
-    private static void decodeRequestHeader(HttpRequestBuilder builder, BufferedReader headerBuffer) throws HaltException {
+    private static void decodeRequestHeader(HttpRequest request, BufferedReader headerBuffer) throws HaltException {
         try {
             // Request line
             String requestLine = headerBuffer.readLine();
@@ -126,7 +143,7 @@ public class HttpParser {
             // Get method
             if (!tokenizer.hasMoreTokens())
                 throw new HaltException(Status.BAD_REQUEST);
-            builder.method(tokenizer.nextToken());
+            request.method(tokenizer.nextToken());
 
             // Get URI
             if (!tokenizer.hasMoreTokens())
@@ -140,41 +157,30 @@ public class HttpParser {
                 path = decodePercent(rawURI.substring(0, sep));
                 queryString = rawURI.substring(sep + 1);
 
-                builder.path(path)
-                        .queryString(queryString)
-                        .uri(path + '?' + queryString);
+                request.path(path);
+                request.queryString(queryString);
+                request.uri(path + '?' + queryString);
 
-                decodeQueryString(builder, queryString);
+                decodeQueryString(request, queryString);
             }
             else {
                 path = decodePercent(rawURI);
 
-                builder.path(path)
-                        .queryString("")
-                        .uri(path);
+                request.path(path);
+                request.queryString("");
+                request.uri(path);
             }
 
             // Get protocol version
             if (!tokenizer.hasMoreTokens())
                 throw new HaltException(Status.BAD_REQUEST);
-            builder.protocol(tokenizer.nextToken());
+            request.protocol(tokenizer.nextToken());
 
             // Get headers
             String headerLine;
             String key = null;
-
-            // Use trim() to ignore possible spaces and tabs
-            // Consider header value written in multiple lines
             while ((headerLine = headerBuffer.readLine()) != null) {
-                sep = headerLine.indexOf(":");
-
-                if (sep > 0) {
-                    key = headerLine.substring(0, sep).trim().toLowerCase();
-                    builder.header(key, headerLine.substring(sep + 1).trim());
-                }
-                else if (key != null && (headerLine.startsWith(" ") || headerLine.startsWith("\t"))) {
-                    builder.header(key, builder.header(key) + headerLine.trim());
-                }
+                key = parseHeadline(request, headerLine, key);
             }
 
         } catch (IOException e) {
@@ -207,8 +213,8 @@ public class HttpParser {
     /**
      * Check `Cookie` header and create Map for the request
      */
-    private static void generateCookiesHolder(HttpRequestBuilder builder) throws HaltException {
-        String cookies = builder.header("cookie");
+    private static void generateCookiesHolder(HttpRequest request) throws HaltException {
+        String cookies = request.header("cookie");
 
         if (cookies != null) {
             Map<String, String> cookiesHolder = new HashMap<>();
@@ -225,7 +231,7 @@ public class HttpParser {
                 }
             }
 
-            builder.cookiesHolder(cookiesHolder);
+            request.cookiesHolder(cookiesHolder);
         }
     }
 
@@ -234,9 +240,9 @@ public class HttpParser {
      * If the request used chunked transfer, substitute the
      * chunked body with merged body
      */
-    private static void mergeChunkedBody(HttpRequestBuilder builder) throws HaltException {
-        String transferEncoding = builder.header("transfer-encoding");
-        byte[] bodyRaw = builder.bodyRaw();
+    private static void mergeChunkedBody(HttpRequest request) throws HaltException {
+        String transferEncoding = request.header("transfer-encoding");
+        byte[] bodyRaw = request.bodyRaw();
 
         if (transferEncoding != null && transferEncoding.equals("chunked") && bodyRaw.length > 0) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bodyRaw)));
@@ -270,7 +276,7 @@ public class HttpParser {
                                 System.arraycopy(chunk, 0, merged, start, chunk.length);
                                 start += chunk.length;
                             }
-                            builder.body(merged);
+                            request.body(merged);
                         }
                         else {
                             nextLine = reader.readLine();
@@ -282,15 +288,7 @@ public class HttpParser {
                     }
                     else {
                         // Parse footers like headers
-                        sep = line.indexOf(":");
-
-                        if (sep > 0) {
-                            key = line.substring(0, sep).trim().toLowerCase();
-                            builder.header(key, line.substring(sep + 1).trim());
-                        }
-                        else if (key != null && (line.startsWith(" ") || line.startsWith("\t"))) {
-                            builder.header(key, builder.header(key) + line.trim());
-                        }
+                        key = parseHeadline(request, line, key);
                     }
                 }
             } catch (IOException e) {
@@ -302,8 +300,8 @@ public class HttpParser {
     /**
      * Parse InputStream and create Request object
      */
-    public static HttpRequestBuilder parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
-        HttpRequestBuilder builder = new HttpRequestBuilder();
+    public static HttpRequest parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
+        HttpRequest request = RequestResponseFactory.createHttpRequest();
 
         // Enable mark/reset support
         BufferedInputStream bufferedIn = new BufferedInputStream(in, BUFFER_SIZE);
@@ -340,7 +338,7 @@ public class HttpParser {
                 throw new HaltException(Status.BAD_REQUEST);
 
             BufferedReader headerBuffer = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buffer, 0, split)));
-            decodeRequestHeader(builder, headerBuffer);
+            decodeRequestHeader(request, headerBuffer);
 
             // Skip header bytes
             try {
@@ -373,16 +371,17 @@ public class HttpParser {
                 bodyBuffer.add(body);
             }
 
-            builder.body(assembleRequestBody(bodyBuffer));
+            request.body(assembleRequestBody(bodyBuffer));
 
-            generateCookiesHolder(builder);
+            generateCookiesHolder(request);
 
-            mergeChunkedBody(builder);
+            mergeChunkedBody(request);
+
         } catch (IOException e) {
             throw new ClosedConnectionException();
         }
 
-        return builder;
+        return request;
     }
 
     public static void sendResponse(OutputStream out, HttpResponse response) throws ClosedConnectionException {

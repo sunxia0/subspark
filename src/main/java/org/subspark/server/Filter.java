@@ -1,7 +1,7 @@
-package org.subspark.server.filter;
+package org.subspark.server;
 
-import org.subspark.server.request.HttpRequest;
-import org.subspark.server.response.HttpResponse;
+import org.subspark.server.HttpRequest;
+import org.subspark.server.HttpResponse;
 
 /**
  * A Filter is called by the Web server to process data before or after the

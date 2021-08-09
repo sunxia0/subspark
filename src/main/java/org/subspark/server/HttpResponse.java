@@ -1,5 +1,7 @@
-package org.subspark.server.response;
+package org.subspark.server;
 
+
+import org.subspark.server.http.Status;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

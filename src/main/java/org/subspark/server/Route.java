@@ -1,7 +1,7 @@
-package org.subspark.server.route;
+package org.subspark.server;
 
-import org.subspark.server.request.HttpRequest;
-import org.subspark.server.response.HttpResponse;
+import org.subspark.server.HttpRequest;
+import org.subspark.server.HttpResponse;
 
 /**
  * A Route Handler is called when an HTTP request maps to the assigned route. It

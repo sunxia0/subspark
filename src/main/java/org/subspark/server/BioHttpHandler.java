@@ -1,14 +1,9 @@
-package org.subspark.server.io;
+package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.WebService;
 import org.subspark.server.exceptions.ClosedConnectionException;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.handling.RequestHandler;
-import org.subspark.server.request.HttpRequestBuilder;
-import org.subspark.server.response.HttpResponse;
-import org.subspark.server.response.HttpResponseBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +41,7 @@ public class BioHttpHandler {
         @Override
         public void run() {
             RequestHandler requestHandler = service.getRequestHandler();
-            HttpRequestBuilder requestBuilder;
+            HttpRequest request;
             HttpResponse response = null;
 
             while (!socket.isClosed()) {
@@ -55,16 +50,16 @@ public class BioHttpHandler {
                     OutputStream out = socket.getOutputStream();
 
                     try {
-                        requestBuilder = HttpParser.parseRequest(in);
+                        request = HttpParser.parseRequest(in);
 
-                        logger.info(requestBuilder.method() + " " + requestBuilder.uri());
+                        logger.info(request.method() + " " + request.uri());
 
                         // Send 100 Continue
-                        if (requestBuilder.protocol().equals("HTTP/1.1")) {
-                            HttpParser.sendResponse(out, HttpResponseBuilder.of100());
+                        if (request.protocol().equals(Constant.HTTP_1_1)) {
+                            HttpParser.sendResponse(out, RequestResponseFactory.of100());
                         }
 
-                        response = requestHandler.handleRequest(requestBuilder);
+                        response = requestHandler.handleRequest(request);
                     } catch (HaltException e) {
                         response = requestHandler.handleException(e);
                     }
@@ -74,7 +69,7 @@ public class BioHttpHandler {
                 } catch (ClosedConnectionException | IOException e) {
                     response = null;
                 } finally {
-                    if (response == null || response.header("connection").equals(HttpResponseBuilder.CONNECTION_CLOSE)) {
+                    if (response == null || response.header("connection").equals(Constant.CONNECTION_CLOSE)) {
                         try {
                             socket.close();
                             logger.info(String.format("Close socket connection - %s:%d",

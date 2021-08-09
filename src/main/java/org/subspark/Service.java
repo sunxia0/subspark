@@ -2,11 +2,11 @@ package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.filter.Filter;
-import org.subspark.server.route.Route;
+import org.subspark.server.Filter;
+import org.subspark.server.Route;
 import org.subspark.server.WebService;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.response.Status;
+import org.subspark.server.http.Status;
 
 
 public class Service extends WebService {

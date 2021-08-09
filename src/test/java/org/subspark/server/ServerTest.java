@@ -1,9 +1,7 @@
 package org.subspark.server;
 
 import org.junit.*;
-import org.subspark.server.io.HttpParser;
-import org.subspark.server.request.Method;
-import org.subspark.server.request.HttpRequest;
+import org.subspark.server.http.Method;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -34,10 +32,12 @@ public class ServerTest {
                 "Host: localhost\n" +
                 "Accept: */*\n" +
                 "Referer: https://websniffer.cc/\n" +
-                "Connection: close\n\n";
+                "Connection: close\n" +
+                "Own: line1\n line2\n\tline3\n" +
+                "\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in).toRequest();
+        HttpRequest request = HttpParser.parseRequest(in);
 
         Assert.assertEquals(Method.GET, request.method());
         Assert.assertEquals("/api/blog/get", request.path());
@@ -60,6 +60,7 @@ public class ServerTest {
            put("accept", "*/*");
            put("referer", "https://websniffer.cc/");
            put("connection", "close");
+           put("own", "line1line2line3");
         }};
         Assert.assertEquals(headerMap.keySet(), request.headers());
         for (String k : request.headers())
@@ -162,7 +163,7 @@ public class ServerTest {
 
     @Ignore
     @Test
-    public void chunkedTransferTest() throws Exception {
+    public void chunkedTransferTest() {
         String str = "POST / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
@@ -177,14 +178,16 @@ public class ServerTest {
                 "1234567890abcdef\r\n" +
                 "0\r\n" +
                 "footer1 : val1\r\n" +
-                "footer2: val2\r\n";
+                "footer2: val2\r\n" +
+                "footer3: val31,\n val32,\n\tval33\r\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in).toRequest();
+        HttpRequest request = HttpParser.parseRequest(in);
 
         Assert.assertEquals("abcdefghijklmnopqrstuvwxyz1234567890abcdef", request.body());
         Assert.assertEquals("val1", request.header("footer1"));
         Assert.assertEquals("val2", request.header("footer2"));
+        Assert.assertEquals("val31,val32,val33", request.header("footer3"));
     }
 
     @Ignore
@@ -199,7 +202,7 @@ public class ServerTest {
                 "Connection: close\n\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in).toRequest();
+        HttpRequest request = HttpParser.parseRequest(in);
 
         Map<String, String> cookies = new HashMap<>(){{
            put("PHPSESSID", "298zf09hf012fh2");

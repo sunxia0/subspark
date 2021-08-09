@@ -1,4 +1,4 @@
-package org.subspark.server.request;
+package org.subspark.server.http;
 
 public enum Method {
     GET, HEAD, POST;

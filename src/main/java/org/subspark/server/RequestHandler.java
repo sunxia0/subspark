@@ -1,16 +1,10 @@
-package org.subspark.server.handling;
+package org.subspark.server;
 
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.WebService;
-import org.subspark.server.common.MimeType;
 import org.subspark.server.exceptions.HaltException;
-import org.subspark.server.request.HttpRequest;
-import org.subspark.server.request.HttpRequestBuilder;
-import org.subspark.server.response.HttpResponse;
-import org.subspark.server.response.HttpResponseBuilder;
-import org.subspark.server.response.Status;
+import org.subspark.server.http.Status;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,30 +23,20 @@ public class RequestHandler {
     }
 
     // TODO: add route support (use staticFilesHandler to handle all requests now)
-    public HttpResponse handleRequest(HttpRequestBuilder requestBuilder) throws HaltException {
-        RequestChecker.checkAbsoluteURL(requestBuilder, URLPattern);
-
-        HttpRequest request = requestBuilder.toRequest();
-
+    public HttpResponse handleRequest(HttpRequest request) throws HaltException {
+        RequestChecker.checkAbsoluteURL(request, URLPattern);
         RequestChecker.checkSpecification(request);
 
-        HttpResponseBuilder responseBuilder = service.getStaticFilesHandler().consumeFileRequest(request);
+        HttpResponse response = service.getStaticFilesHandler().consumeFileRequest(request);
 
         if (!RequestChecker.isKeepAlive(request))
-            responseBuilder.header("connection", "close");
+            response.header("connection", Constant.CONNECTION_CLOSE);
 
-        return responseBuilder.toResponse();
+        return response;
     }
 
     public HttpResponse handleException(HaltException exception) {
-        HttpResponseBuilder builder = new HttpResponseBuilder();
-
-        builder.status(exception.getStatus())
-                .header("content-type", MimeType.TXT)
-                .header("connection", "close")
-                .body(exception.getMessage());
-
-        return builder.toResponse();
+        return RequestResponseFactory.createHttpResponse(exception);
     }
 
     private static final class RequestChecker {
@@ -64,8 +48,8 @@ public class RequestHandler {
         /**
          * Handle absolute URL, and substitute it with relative URL
          */
-        public static void checkAbsoluteURL(HttpRequestBuilder requestBuilder, Pattern URLPattern) throws HaltException {
-            Matcher uriMatcher = URLPattern.matcher(requestBuilder.uri());
+        public static void checkAbsoluteURL(HttpRequest request, Pattern URLPattern) throws HaltException {
+            Matcher uriMatcher = URLPattern.matcher(request.uri());
 
             if (!uriMatcher.find())
                 throw new HaltException(Status.BAD_REQUEST, "Invalid Path");
@@ -79,8 +63,8 @@ public class RequestHandler {
                 String newURI = uriMatcher.group(2);
                 String newPath = uriMatcher.group(3);
 
-                requestBuilder.uri(newURI);
-                requestBuilder.path(newPath);
+                request.uri(newURI);
+                request.path(newPath);
             }
         }
 
@@ -97,7 +81,7 @@ public class RequestHandler {
                 throw new HaltException(Status.BAD_REQUEST);
 
             // Check `host` header for HTTP/1.1
-            if (request.protocol().equals("HTTP/1.1") && request.header("host") == null)
+            if (request.protocol().equals(Constant.HTTP_1_1) && request.header("host") == null)
                 throw new HaltException(Status.BAD_REQUEST);
         }
 
@@ -107,8 +91,8 @@ public class RequestHandler {
         public static boolean isKeepAlive(HttpRequest request) {
             String protocolVersion = request.protocol();
             String connection = request.header("connection");
-            return protocolVersion.equals("HTTP/1.1")
-                    && (connection == null || connection.equals(HttpResponseBuilder.CONNECTION_KEEP_ALIVE));
+            return protocolVersion.equals(Constant.HTTP_1_1)
+                    && (connection == null || connection.equals(Constant.CONNECTION_KEEP_ALIVE));
         }
     }
 }

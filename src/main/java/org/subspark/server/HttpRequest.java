@@ -1,7 +1,7 @@
-package org.subspark.server.request;
+package org.subspark.server;
 
 
-import org.subspark.server.Session;
+import org.subspark.server.http.Method;
 
 import java.util.*;
 
@@ -23,7 +23,7 @@ public class HttpRequest {
     }
 
     /**
-     * ======= Setters only for RequestBuilder and sub class ======
+     * ======= Setters only for the class of the same package ======
      */
     protected void method(String method) {
         this.method = Method.fromString(method);

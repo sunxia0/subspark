@@ -1,4 +1,4 @@
-package org.subspark.server.common;
+package org.subspark.server;
 
 
 import java.util.HashMap;

@@ -3,11 +3,6 @@ package org.subspark.server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.subspark.server.handling.RequestHandler;
-import org.subspark.server.handling.StaticFilesHandler;
-import org.subspark.server.io.BioHttpHandler;
-import org.subspark.server.listener.BioHttpListener;
-
 
 public class WebService {
     private final static Logger logger = LogManager.getLogger(WebService.class);

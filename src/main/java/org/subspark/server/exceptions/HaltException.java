@@ -1,6 +1,6 @@
 package org.subspark.server.exceptions;
 
-import org.subspark.server.response.Status;
+import org.subspark.server.http.Status;
 
 public class HaltException extends RuntimeException {
     private static final long serialVersionUID = -1781180700340240978L;
