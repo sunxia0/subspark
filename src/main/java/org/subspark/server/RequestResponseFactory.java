@@ -18,12 +18,17 @@ public final class RequestResponseFactory {
         //Set HTTP version
         response.protocol(Constant.HTTP_1_1);
 
+        //Set default status
+        response.status(Status.OK);
+
         String now = DateUtils.now();
 
         //Set essential headers
         response.header("server", Constant.HEADER_SERVER);
         response.header("date", now);
         response.header("connection", Constant.CONNECTION_KEEP_ALIVE);
+        response.header("content-type", MimeType.TXT);
+        response.header("content-length", "0");
         return response;
     }
 

@@ -32,6 +32,9 @@ public class HttpResponse {
 
     public void bodyRaw(byte[] b) {
         this.body = b;
+        if (b != null) {
+            header("content-length", String.valueOf(b.length));
+        }
     }
 
     public void body(String body) {
