@@ -150,9 +150,10 @@ public class HttpRequest {
     }
 
     public String cookie(String name) {
-        if (name == null || cookies() == null)
+        if (name == null || cookies() == null) {
             return null;
-        else
+        } else {
             return cookies().get(name);
+        }
     }
 }

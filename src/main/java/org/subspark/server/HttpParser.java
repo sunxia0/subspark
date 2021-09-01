@@ -105,7 +105,7 @@ public class HttpParser {
             sep = pair.indexOf("=");
 
             if (sep == -1)
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "Invalid query string");
 
             // The value of the next parameter with the same name will override the value of the previous one
             request.queryParam(decodePercent(pair.substring(0, sep)), decodePercent(pair.substring(sep + 1)));
@@ -123,8 +123,7 @@ public class HttpParser {
         if (sep > 0) {
             key = headerLine.substring(0, sep).trim().toLowerCase();
             request.header(key, headerLine.substring(sep + 1).trim());
-        }
-        else if (key != null && (headerLine.startsWith(" ") || headerLine.startsWith("\t"))) {
+        } else if (key != null && (headerLine.startsWith(" ") || headerLine.startsWith("\t"))) {
             request.header(key, request.header(key) + headerLine.trim());
         }
 
@@ -142,12 +141,12 @@ public class HttpParser {
 
             // Get method
             if (!tokenizer.hasMoreTokens())
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "No HTTP verb in request");
             request.method(tokenizer.nextToken());
 
             // Get URI
             if (!tokenizer.hasMoreTokens())
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "No path in request");
             String rawURI = tokenizer.nextToken();
             String path, queryString;
 
@@ -162,8 +161,7 @@ public class HttpParser {
                 request.uri(path + '?' + queryString);
 
                 decodeQueryString(request, queryString);
-            }
-            else {
+            } else {
                 path = decodePercent(rawURI);
 
                 request.path(path);
@@ -173,7 +171,7 @@ public class HttpParser {
 
             // Get protocol version
             if (!tokenizer.hasMoreTokens())
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "No protocol version in request");
             request.protocol(tokenizer.nextToken());
 
             // Get headers
@@ -185,7 +183,7 @@ public class HttpParser {
 
         } catch (IOException e) {
             logger.error("An error occurred when parsing request header", e);
-            throw new HaltException(Status.INTERNAL_SERVER_ERROR);
+            throw new HaltException(Status.INTERNAL_SERVER_ERROR, "An IOException occurred when parsing request header");
         }
     }
 
@@ -226,7 +224,7 @@ public class HttpParser {
                 if (kv.length() > 0) {
                     sep = kv.indexOf("=");
                     if (sep == -1)
-                        throw new HaltException(Status.BAD_REQUEST);
+                        throw new HaltException(Status.BAD_REQUEST, "Invalid cookie value");
                     cookiesHolder.put(kv.substring(0, sep), kv.substring(sep + 1));
                 }
             }
@@ -244,7 +242,7 @@ public class HttpParser {
         String transferEncoding = request.header("transfer-encoding");
         byte[] bodyRaw = request.bodyRaw();
 
-        if (transferEncoding != null && transferEncoding.equals("chunked") && bodyRaw.length > 0) {
+        if ("chunked".equals(transferEncoding) && bodyRaw.length > 0) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bodyRaw)));
             boolean bodyEnd = false;
             String line, nextLine, key = null;
@@ -263,7 +261,7 @@ public class HttpParser {
                             lineLength = Integer.parseInt(line, 16);
                             fullLength += lineLength;
                         } catch (NumberFormatException e) {
-                            throw new HaltException(Status.BAD_REQUEST);
+                            throw new HaltException(Status.BAD_REQUEST, "Invalid chunked body");
                         }
 
                         if (lineLength == 0) {
@@ -277,16 +275,14 @@ public class HttpParser {
                                 start += chunk.length;
                             }
                             request.body(merged);
-                        }
-                        else {
+                        } else {
                             nextLine = reader.readLine();
                             if (nextLine == null) {
                                 throw new HaltException(Status.BAD_REQUEST, "Unclosed chunked body!");
                             }
                             chunks.add(nextLine.getBytes());
                         }
-                    }
-                    else {
+                    } else {
                         // Parse footers like headers
                         key = parseHeadline(request, line, key);
                     }
@@ -321,7 +317,7 @@ public class HttpParser {
             read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
 
             if (read == -1)
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "Empty request!");
 
             while (readLength <= BUFFER_SIZE && read > 0) {
                 split = findHeaderEnd(buffer, readLength, readLength + read);
@@ -335,7 +331,7 @@ public class HttpParser {
 
             // Don't find split byte, invalid request
             if (split == 0)
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "Invalid split byte");
 
             BufferedReader headerBuffer = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buffer, 0, split)));
             decodeRequestHeader(request, headerBuffer);
@@ -352,7 +348,7 @@ public class HttpParser {
 
             } catch (IOException e) {
                 logger.error("An error occurred when decoding request body", e);
-                throw new HaltException(Status.INTERNAL_SERVER_ERROR);
+                throw new HaltException(Status.INTERNAL_SERVER_ERROR, "An IOException occurred when decoding request body");
             }
 
             // Read body
@@ -364,7 +360,7 @@ public class HttpParser {
 
                 // Too large request body
                 if (bodyBuffer.size() == MAXIMUM_BODY_BUFFER_PAGE)
-                    throw new HaltException(Status.BAD_REQUEST);
+                    throw new HaltException(Status.BAD_REQUEST, "Too large request body");
 
                 body = new byte[read];
                 System.arraycopy(buffer, 0, body, 0, read);
@@ -403,7 +399,6 @@ public class HttpParser {
             if (body != null && body.length > 0)
                 out.write(body);
 
-            out.flush();
         } catch (IOException e) {
             throw new ClosedConnectionException();
         }

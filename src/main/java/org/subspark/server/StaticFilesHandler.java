@@ -12,31 +12,25 @@ import org.subspark.server.utils.FileUtils;
 public class StaticFilesHandler {
     private final static Logger logger = LogManager.getLogger(StaticFilesHandler.class);
 
-    private final WebService service;
-
     private String staticFileLocation;
 
-    public StaticFilesHandler(WebService service) {
-        this.service = service;
+    public StaticFilesHandler() {
     }
 
     public void staticFileLocation(String staticFileLocation) {
         this.staticFileLocation = staticFileLocation;
     }
 
-    public HttpResponse consumeFileRequest(HttpRequest request) throws HaltException {
+    public void consumeFileRequest(HttpRequest request, HttpResponse response) throws HaltException {
         Method method = request.method();
         if (method != Method.GET && method != Method.HEAD) {
             throw new HaltException(request.protocol().equals(Constant.HTTP_1_1) ?
-                    Status.METHOD_NOT_ALLOWED : Status.BAD_REQUEST);
+                    Status.METHOD_NOT_ALLOWED : Status.BAD_REQUEST, "Invalid HTTP method for the resource");
         }
 
         String fullPath = FileUtils.getFullPath(staticFileLocation, request.path());
         if (!FileUtils.fileExists(fullPath))
             throw new HaltException(Status.NOT_FOUND);
-
-        HttpResponse response = RequestResponseFactory.createHttpResponse();
-        response.protocol(request.protocol());
 
         long lastModified = FileUtils.getLastModified(fullPath);
 
@@ -44,7 +38,6 @@ public class StaticFilesHandler {
         long ifUnmodifiedSince = DateUtils.fromDateString(request.header("if-unmodified-since"));
         if (ifUnmodifiedSince >= 0 && lastModified > ifUnmodifiedSince) {
             response.status(Status.PRECONDITION_FAILED);
-            return response;
         }
 
         if (method == Method.GET) {
@@ -55,16 +48,13 @@ public class StaticFilesHandler {
                 response.header("last-modified", DateUtils.fromTimestamp(lastModified));
                 response.header("content-type", MimeType.getMimeType(fullPath));
                 response.bodyRaw(FileUtils.getFileBytes(fullPath));
-            }
-            else {
+            } else {
                 response.status(Status.NOT_MODIFIED);
             }
-        }
-        else { // Method.HEAD
+        } else { // Method.HEAD
             response.status(Status.OK);
             response.header("last-modified", DateUtils.fromTimestamp(lastModified));
             response.header("content-length", String.valueOf(FileUtils.getFileLength(fullPath)));
         }
-        return response;
     }
 }

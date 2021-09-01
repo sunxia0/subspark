@@ -29,8 +29,7 @@ public class WebServer {
 
             System.out.println("Waiting to handle requests!");
             awaitInitialization();
-        }
-        else {
+        } else {
             System.out.println("Wrong args!");
         }
     }

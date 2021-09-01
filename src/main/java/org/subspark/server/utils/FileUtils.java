@@ -32,8 +32,7 @@ public class FileUtils {
                 level--;
                 if (level < 0)
                     return false;
-            }
-            else if (!".".equals(current)) {
+            } else if (!".".equals(current)) {
                 level++;
             }
         }
@@ -52,10 +51,11 @@ public class FileUtils {
 
         String fullPath = basePath + filePath;
         File file = new File(fullPath);
-        if (file.isDirectory())
+        if (file.isDirectory()) {
             return fullPath + (filePath.endsWith("/") ? "" : "/") + "index.html";
-        else
+        } else {
             return fullPath;
+        }
     }
 
     /**

@@ -59,10 +59,11 @@ public class Request extends HttpRequest {
         if (param == null)
             return null;
 
-        if (param.startsWith(":"))
+        if (param.startsWith(":")) {
             return params().get(param.toLowerCase());
-        else
+        } else {
             return params().get(':' + param.toLowerCase());
+        }
     }
 
     /**

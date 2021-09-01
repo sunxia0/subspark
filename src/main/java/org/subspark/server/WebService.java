@@ -2,6 +2,7 @@ package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.subspark.server.http.Method;
 
 
 public class WebService {
@@ -21,7 +22,8 @@ public class WebService {
     private BioHttpListener listener;
     private BioHttpHandler ioHandler;
     private RequestHandler requestHandler;
-    private StaticFilesHandler staticFilesHandler;
+    private StaticFilesHandler staticFilesHandler = new StaticFilesHandler();
+    private Router router = new Router();
 
     public BioHttpListener getListener() {
         return listener;
@@ -39,10 +41,28 @@ public class WebService {
         return staticFilesHandler;
     }
 
+    public Router getRouter() {
+        return router;
+    }
+
     protected WebService() {}
 
     public static void main(String[] args) {
         WebService ws = new WebService();
+
+        ws.addBeforeFilter("/test", (req, resp) -> {
+            System.out.println("In before filter");
+        });
+
+        ws.addRoute(Method.GET, "/test", (req, resp) -> {
+            System.out.println("In get route");
+            return "Hello, World!\n";
+        });
+
+        ws.addAfterFilter("/test", (req, resp) -> {
+            System.out.println("In after filter");
+        });
+
         ws.start();
     }
 
@@ -53,7 +73,6 @@ public class WebService {
         this.listener = new BioHttpListener(this);
         this.ioHandler = new BioHttpHandler(this);
         this.requestHandler =  new RequestHandler(this);
-        this.staticFilesHandler = new StaticFilesHandler(this);
 
         this.staticFilesHandler.staticFileLocation(staticFileLocation);
         this.listener.listen();
@@ -149,6 +168,18 @@ public class WebService {
      */
     public int threadPool() {
         return this.threads;
+    }
+
+    public void addBeforeFilter(String path, Filter filter) {
+        this.router.addBeforeFilter(path, filter);
+    }
+
+    public void addAfterFilter(String path, Filter filter) {
+        this.router.addAfterFilter(path, filter);
+    }
+
+    public void addRoute(Method method, String path, Route route) {
+        this.router.addRoute(method, path, route);
     }
 
     ////////////////////////////////////////////
