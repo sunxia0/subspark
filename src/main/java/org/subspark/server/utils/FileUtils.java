@@ -1,7 +1,7 @@
 package org.subspark.server.utils;
 
 
-import org.subspark.server.exceptions.HaltException;
+import org.subspark.server.HaltException;
 import org.subspark.server.http.Status;
 
 import java.io.*;
@@ -46,8 +46,9 @@ public class FileUtils {
      * the directory will be returned.
      */
     public static String getFullPath(String basePath, String filePath) throws HaltException {
-        if (!isFilePathValid(filePath))
+        if (!isFilePathValid(filePath)) {
             throw new HaltException(Status.FORBIDDEN, "Invalid path.");
+        }
 
         String fullPath = basePath + filePath;
         File file = new File(fullPath);
@@ -87,12 +88,16 @@ public class FileUtils {
     public static long getFileLength(String filePath) throws HaltException {
         File file = new File(filePath);
 
-        if (!file.exists())
+        if (!file.exists()) {
             throw new HaltException(Status.NOT_FOUND,
                     "NOT FOUND: File not found!");
-        if (file.isDirectory())
+        }
+
+        if (file.isDirectory()) {
             throw new HaltException(Status.INTERNAL_SERVER_ERROR,
                     "Directory has no length!");
+        }
+
         return file.length();
     }
 
@@ -102,9 +107,10 @@ public class FileUtils {
     public static long getLastModified(String filePath) throws HaltException {
         File file = new File(filePath);
 
-        if (!file.exists())
+        if (!file.exists()) {
             throw new HaltException(Status.NOT_FOUND,
                     "NOT FOUND: File not found!");
+        }
 
         return file.lastModified();
     }

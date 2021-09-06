@@ -3,7 +3,6 @@ package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.http.Method;
 import org.subspark.server.http.Status;
 import org.subspark.server.utils.DateUtils;
@@ -14,23 +13,23 @@ public class StaticFilesHandler {
 
     private String staticFileLocation;
 
-    public StaticFilesHandler() {
-    }
+    public StaticFilesHandler() {}
 
     public void staticFileLocation(String staticFileLocation) {
         this.staticFileLocation = staticFileLocation;
     }
 
-    public void consumeFileRequest(HttpRequest request, HttpResponse response) throws HaltException {
+    private void consumeFileRequest(HttpRequest request, HttpResponse response) throws HaltException {
+        String fullPath = FileUtils.getFullPath(staticFileLocation, request.path());
+        if (!FileUtils.fileExists(fullPath)) {
+            throw new HaltException(Status.NOT_FOUND);
+        }
+
         Method method = request.method();
         if (method != Method.GET && method != Method.HEAD) {
             throw new HaltException(request.protocol().equals(Constant.HTTP_1_1) ?
                     Status.METHOD_NOT_ALLOWED : Status.BAD_REQUEST, "Invalid HTTP method for the resource");
         }
-
-        String fullPath = FileUtils.getFullPath(staticFileLocation, request.path());
-        if (!FileUtils.fileExists(fullPath))
-            throw new HaltException(Status.NOT_FOUND);
 
         long lastModified = FileUtils.getLastModified(fullPath);
 
@@ -40,21 +39,30 @@ public class StaticFilesHandler {
             response.status(Status.PRECONDITION_FAILED);
         }
 
-        if (method == Method.GET) {
-            // Check If-Modified-Since
-            long ifModifiedSince = DateUtils.fromDateString(request.header("if-modified-since"));
-            if (lastModified >= ifModifiedSince) {
-                response.status(Status.OK);
-                response.header("last-modified", DateUtils.fromTimestamp(lastModified));
-                response.header("content-type", MimeType.getMimeType(fullPath));
-                response.bodyRaw(FileUtils.getFileBytes(fullPath));
-            } else {
-                response.status(Status.NOT_MODIFIED);
-            }
-        } else { // Method.HEAD
+        // Check If-Modified-Since
+        long ifModifiedSince = DateUtils.fromDateString(request.header("if-modified-since"));
+        if (lastModified >= ifModifiedSince) {
             response.status(Status.OK);
             response.header("last-modified", DateUtils.fromTimestamp(lastModified));
-            response.header("content-length", String.valueOf(FileUtils.getFileLength(fullPath)));
+            response.header("content-type", MimeType.getMimeType(fullPath));
+            response.bodyRaw(FileUtils.getFileBytes(fullPath));
+        } else {
+            response.status(Status.NOT_MODIFIED);
+        }
+    }
+
+    public boolean consume(HttpRequest request, HttpResponse response) {
+        try {
+            consumeFileRequest(request, response);
+            return true;
+        } catch (HaltException e) {
+            boolean isConsumed = e.getStatus() != Status.NOT_FOUND;
+            if (isConsumed) {
+                response.status(e.getStatus());
+                response.header("content-type", MimeType.TXT);
+                response.body(e.getMessage());
+            }
+            return isConsumed;
         }
     }
 }

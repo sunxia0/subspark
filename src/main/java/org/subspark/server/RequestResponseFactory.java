@@ -1,7 +1,6 @@
 package org.subspark.server;
 
 
-import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.http.Status;
 import org.subspark.server.utils.DateUtils;
 

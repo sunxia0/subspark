@@ -24,8 +24,9 @@ public class DateUtils {
     }
 
     public static long fromDateString(String dateString) {
-        if (dateString == null)
+        if (dateString == null) {
             return -1L;
+        }
 
         try {
             Date date = gmtFormat.parse(dateString);

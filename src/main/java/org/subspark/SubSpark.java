@@ -3,7 +3,7 @@ package org.subspark;
 import org.subspark.server.Session;
 import org.subspark.server.Route;
 import org.subspark.server.Filter;
-import org.subspark.server.exceptions.HaltException;
+import org.subspark.server.HaltException;
 
 public class SubSpark {
 

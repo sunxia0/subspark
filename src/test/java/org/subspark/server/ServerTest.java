@@ -4,6 +4,7 @@ import org.junit.*;
 import org.subspark.server.http.Method;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -26,7 +27,7 @@ public class ServerTest {
 
     @Ignore
     @Test
-    public void requestParsingTest() {
+    public void requestParsingTest() throws IOException {
         String str = "GET /api/blog/get?id=1&mon=2&day=23 HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
@@ -163,7 +164,7 @@ public class ServerTest {
 
     @Ignore
     @Test
-    public void chunkedTransferTest() {
+    public void chunkedTransferTest() throws IOException {
         String str = "POST / HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +
@@ -192,7 +193,7 @@ public class ServerTest {
 
     @Ignore
     @Test
-    public void cookiesGenerateTest() {
+    public void cookiesGenerateTest() throws IOException {
         String str = "GET /api/blog/get?id=1&mon=2&day=23 HTTP/1.1\n" +
                 "User-Agent: WebSniffer/1.0 (+http://websniffer.cc/)\n" +
                 "Host: localhost\n" +

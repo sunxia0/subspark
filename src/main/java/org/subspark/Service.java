@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.subspark.server.Filter;
 import org.subspark.server.Route;
 import org.subspark.server.WebService;
-import org.subspark.server.exceptions.HaltException;
+import org.subspark.server.HaltException;
 import org.subspark.server.http.Status;
 
 

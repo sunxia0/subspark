@@ -1,4 +1,4 @@
-package org.subspark.server.exceptions;
+package org.subspark.server;
 
 import org.subspark.server.http.Status;
 
@@ -27,6 +27,7 @@ public class HaltException extends RuntimeException {
         return status;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }

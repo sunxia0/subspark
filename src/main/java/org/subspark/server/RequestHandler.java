@@ -3,7 +3,6 @@ package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.http.Status;
 
 import java.util.regex.Matcher;
@@ -22,15 +21,20 @@ public class RequestHandler {
         this.URLPattern = Pattern.compile(String.format("^(http://%s:%d)?((/.*?)(\\?.*)?)$", service.ipAddress(), service.port()));
     }
 
-    // TODO: add route support (use staticFilesHandler to handle all requests now)
     public HttpResponse handleRequest(HttpRequest request) throws HaltException {
         RequestChecker.checkAbsoluteURL(request, URLPattern);
         RequestChecker.checkSpecification(request);
 
-        HttpResponse response = service.getStaticFilesHandler().consumeFileRequest(request);
+        HttpResponse response = RequestResponseFactory.createHttpResponse();
+        response.protocol(request.protocol());
 
         if (!RequestChecker.isKeepAlive(request))
             response.header("connection", Constant.CONNECTION_CLOSE);
+
+        boolean isStaticConsumed = service.getStaticFilesHandler().consume(request, response);
+        if (!isStaticConsumed) {
+            service.getRouter().consume(request, response);
+        }
 
         return response;
     }
@@ -74,15 +78,15 @@ public class RequestHandler {
         public static void checkSpecification(HttpRequest request) throws HaltException {
             // Invalid HTTP verb
             if (request.method() == null)
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "Invalid HTTP verb");
 
             // Invalid HTTP protocol version
             if (!Pattern.matches(HTTP_PROTOCOL_PATTERN, request.protocol()))
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "Invalid HTTP protocol version");
 
             // Check `host` header for HTTP/1.1
             if (request.protocol().equals(Constant.HTTP_1_1) && request.header("host") == null)
-                throw new HaltException(Status.BAD_REQUEST);
+                throw new HaltException(Status.BAD_REQUEST, "No \"Host\" header in an HTTP/1.1 request");
         }
 
         /**

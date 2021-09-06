@@ -34,8 +34,6 @@ package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.exceptions.ClosedConnectionException;
-import org.subspark.server.exceptions.HaltException;
 import org.subspark.server.http.Status;
 
 import java.io.*;
@@ -296,7 +294,7 @@ public class HttpParser {
     /**
      * Parse InputStream and create Request object
      */
-    public static HttpRequest parseRequest(InputStream in) throws HaltException, ClosedConnectionException {
+    public static HttpRequest parseRequest(InputStream in) throws HaltException, IOException {
         HttpRequest request = RequestResponseFactory.createHttpRequest();
 
         // Enable mark/reset support
@@ -309,101 +307,91 @@ public class HttpParser {
         int readLength = 0;
         int split = 0;
 
+        // Read the first 8192 bytes.
+        // Assume the full header should fit in here.
+
+        bufferedIn.mark(BUFFER_SIZE);
+        read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
+
+        if (read == -1)
+            throw new HaltException(Status.BAD_REQUEST, "Empty request!");
+
+        while (readLength <= BUFFER_SIZE && read > 0) {
+            split = findHeaderEnd(buffer, readLength, readLength + read);
+
+            if (split > 0)
+                break;
+
+            readLength += read;
+            read = bufferedIn.read(buffer, readLength, BUFFER_SIZE - readLength);
+        }
+
+        // Don't find split byte, invalid request
+        if (split == 0)
+            throw new HaltException(Status.BAD_REQUEST, "Invalid split byte");
+
+        BufferedReader headerBuffer = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buffer, 0, split)));
+        decodeRequestHeader(request, headerBuffer);
+
+        // Skip header bytes
         try {
-            // Read the first 8192 bytes.
-            // Assume the full header should fit in here.
+            bufferedIn.reset();
 
-            bufferedIn.mark(BUFFER_SIZE);
-            read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
+            long skipped = bufferedIn.skip(split);
 
-            if (read == -1)
-                throw new HaltException(Status.BAD_REQUEST, "Empty request!");
-
-            while (readLength <= BUFFER_SIZE && read > 0) {
-                split = findHeaderEnd(buffer, readLength, readLength + read);
-
-                if (split > 0)
-                    break;
-
-                readLength += read;
-                read = bufferedIn.read(buffer, readLength, BUFFER_SIZE - readLength);
-            }
-
-            // Don't find split byte, invalid request
-            if (split == 0)
-                throw new HaltException(Status.BAD_REQUEST, "Invalid split byte");
-
-            BufferedReader headerBuffer = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buffer, 0, split)));
-            decodeRequestHeader(request, headerBuffer);
-
-            // Skip header bytes
-            try {
-                bufferedIn.reset();
-
-                long skipped = bufferedIn.skip(split);
-
-                // Abnormal skip
-                if (skipped < split)
-                    throw new IOException();
-
-            } catch (IOException e) {
-                logger.error("An error occurred when decoding request body", e);
-                throw new HaltException(Status.INTERNAL_SERVER_ERROR, "An IOException occurred when decoding request body");
-            }
-
-            // Read body
-            while (bufferedIn.available() > 0){
-                read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
-
-                if (read <= 0)
-                    break;
-
-                // Too large request body
-                if (bodyBuffer.size() == MAXIMUM_BODY_BUFFER_PAGE)
-                    throw new HaltException(Status.BAD_REQUEST, "Too large request body");
-
-                body = new byte[read];
-                System.arraycopy(buffer, 0, body, 0, read);
-                bodyBuffer.add(body);
-            }
-
-            request.body(assembleRequestBody(bodyBuffer));
-
-            generateCookiesHolder(request);
-
-            mergeChunkedBody(request);
+            // Abnormal skip
+            if (skipped < split)
+                throw new IOException();
 
         } catch (IOException e) {
-            throw new ClosedConnectionException();
+            logger.error("An abnormal header split detected", e);
+            throw new HaltException(Status.INTERNAL_SERVER_ERROR, "An abnormal header split detected, please check your request.");
         }
+
+        // Read body
+        while (bufferedIn.available() > 0){
+            read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
+
+            if (read <= 0)
+                break;
+
+            // Too large request body
+            if (bodyBuffer.size() == MAXIMUM_BODY_BUFFER_PAGE)
+                throw new HaltException(Status.BAD_REQUEST, "Too large request body");
+
+            body = new byte[read];
+            System.arraycopy(buffer, 0, body, 0, read);
+            bodyBuffer.add(body);
+        }
+
+        request.body(assembleRequestBody(bodyBuffer));
+
+        generateCookiesHolder(request);
+
+        mergeChunkedBody(request);
 
         logger.debug("\n" + request.headerString());
 
         return request;
     }
 
-    public static void sendResponse(OutputStream out, HttpResponse response, boolean withBody) throws ClosedConnectionException {
-        try {
-            String headerString = response.headerString();
-            byte[] body = response.bodyRaw();
+    public static void sendResponse(OutputStream out, HttpResponse response, boolean withBody) throws IOException {
+        String headerString = response.headerString();
+        byte[] body = response.bodyRaw();
 
-            if (response.status() != Status.CONTINUE) {
-                logger.debug("\n" + headerString);
-            }
+        if (response.status() != Status.CONTINUE) {
+            logger.debug("\n" + headerString);
+        }
 
-            // Write header string (including status line and headers)
-            out.write(headerString.getBytes());
+        // Write header string (including status line and headers)
+        out.write(headerString.getBytes());
 
-            // Write separating CRLF
-            out.write("\r\n".getBytes());
+        // Write separating CRLF
+        out.write("\r\n".getBytes());
 
-            // Write body bytes
-            if (withBody && body != null && body.length > 0) {
-                out.write(body);
-            }
-
-        } catch (IOException e) {
-            throw new ClosedConnectionException();
+        // Write body bytes
+        if (withBody && body != null && body.length > 0) {
+            out.write(body);
         }
     }
 }

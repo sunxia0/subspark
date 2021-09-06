@@ -39,7 +39,7 @@ public class HttpResponse {
     }
 
     public void body(String body) {
-        this.body = body == null ? null : body.getBytes();
+        bodyRaw(body == null ? null : body.getBytes());
     }
 
     public String protocol() {

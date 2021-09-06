@@ -2,8 +2,7 @@ package org.subspark.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.exceptions.ClosedConnectionException;
-import org.subspark.server.exceptions.HaltException;
+import org.subspark.server.http.Method;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +40,7 @@ public class BioHttpHandler {
         @Override
         public void run() {
             RequestHandler requestHandler = service.getRequestHandler();
-            HttpRequest request;
+            HttpRequest request = null;
             HttpResponse response = null;
 
             while (!socket.isClosed()) {
@@ -56,7 +55,7 @@ public class BioHttpHandler {
 
                         // Send 100 Continue
                         if (request.protocol().equals(Constant.HTTP_1_1)) {
-                            HttpParser.sendResponse(out, RequestResponseFactory.of100());
+                            HttpParser.sendResponse(out, RequestResponseFactory.of100(), false);
                         }
 
                         response = requestHandler.handleRequest(request);
@@ -64,9 +63,9 @@ public class BioHttpHandler {
                         response = requestHandler.handleException(e);
                     }
 
-                    HttpParser.sendResponse(out, response);
-
-                } catch (ClosedConnectionException | IOException e) {
+                    boolean withBody = (request == null || !request.method().equals(Method.HEAD));
+                    HttpParser.sendResponse(out, response, withBody);
+                } catch (IOException e) {
                     response = null;
                 } finally {
                     if (response == null || response.header("connection").equals(Constant.CONNECTION_CLOSE)) {
@@ -79,7 +78,9 @@ public class BioHttpHandler {
                         }
                     }
                 }
+
             }
+
         }
     }
 }

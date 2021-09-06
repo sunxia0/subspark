@@ -56,11 +56,16 @@ public class WebService {
 
         ws.addRoute(Method.GET, "/test", (req, resp) -> {
             System.out.println("In get route");
-            return "Hello, World!\n";
+            return "123";
         });
 
         ws.addAfterFilter("/test", (req, resp) -> {
             System.out.println("In after filter");
+        });
+
+        ws.addRoute(Method.GET, "/shutdown", (req, resp) -> {
+            ws.stop();
+            return null;
         });
 
         ws.start();
