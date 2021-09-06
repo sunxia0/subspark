@@ -377,27 +377,30 @@ public class HttpParser {
             throw new ClosedConnectionException();
         }
 
+        logger.debug("\n" + request.headerString());
+
         return request;
     }
 
-    public static void sendResponse(OutputStream out, HttpResponse response) throws ClosedConnectionException {
+    public static void sendResponse(OutputStream out, HttpResponse response, boolean withBody) throws ClosedConnectionException {
         try {
-            String statusLine = response.protocol() + " " + response.statusDescription() + "\r\n";
-            String headers = response.headers();
+            String headerString = response.headerString();
             byte[] body = response.bodyRaw();
 
-            // Write status line
-            out.write(statusLine.getBytes());
+            if (response.status() != Status.CONTINUE) {
+                logger.debug("\n" + headerString);
+            }
 
-            // Write headers
-            out.write(headers.getBytes());
+            // Write header string (including status line and headers)
+            out.write(headerString.getBytes());
 
             // Write separating CRLF
             out.write("\r\n".getBytes());
 
             // Write body bytes
-            if (body != null && body.length > 0)
+            if (withBody && body != null && body.length > 0) {
                 out.write(body);
+            }
 
         } catch (IOException e) {
             throw new ClosedConnectionException();

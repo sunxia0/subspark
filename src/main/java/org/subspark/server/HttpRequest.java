@@ -156,4 +156,13 @@ public class HttpRequest {
             return cookies().get(name);
         }
     }
+
+    public String headerString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(method).append(' ').append(uri).append(' ').append(protocolVersion).append("\r\n");
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+        }
+        return sb.toString();
+    }
 }

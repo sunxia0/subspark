@@ -6,6 +6,7 @@ import org.subspark.server.http.Status;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class HttpResponse {
     private String protocolVersion;
@@ -65,8 +66,13 @@ public class HttpResponse {
         return headers.get(header);
     }
 
-    public String headers() {
+    public Set<String> headers() {
+        return headers.keySet();
+    }
+
+    public String headerString() {
         StringBuilder sb = new StringBuilder();
+        sb.append(protocolVersion).append(' ').append(statusDescription()).append("\r\n");
         for (Map.Entry<String, String> e : headers.entrySet())
             sb.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
         return sb.toString();
