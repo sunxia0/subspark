@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,18 +18,29 @@ public class BioHttpHandler {
 
     private final WebService service;
     private final ExecutorService executor;
+    private final List<HttpTask> tasks;
 
     public BioHttpHandler(WebService service) {
         this.service = service;
         this.executor = Executors.newFixedThreadPool(service.threadPool());
-    }
-
-    public void shutdown() {
-        executor.shutdownNow();
+        this.tasks = new ArrayList<>();
     }
 
     public void handle(Socket socket) {
-        executor.execute(new HttpTask(socket));
+        HttpTask task = new HttpTask(socket);
+        executor.execute(task);
+        tasks.add(task);
+    }
+
+    public void removeTask(HttpTask task) {
+        tasks.remove(task);
+    }
+
+    public void close() {
+        executor.shutdownNow();
+        for (HttpTask task : tasks) {
+            task.closeTask();
+        }
     }
 
     private final class HttpTask implements Runnable {
@@ -35,6 +48,18 @@ public class BioHttpHandler {
 
         public HttpTask(Socket socket) {
             this.socket = socket;
+        }
+
+        public void closeTask() {
+            if (!socket.isClosed()) {
+                try {
+                    socket.close();
+                    logger.info(String.format("Close socket connection - %s:%d",
+                            socket.getInetAddress().getHostName(), socket.getPort()));
+                } catch (IOException e) {
+                    logger.error("An error occurred when closing socket", e);
+                }
+            }
         }
 
         @Override
@@ -50,8 +75,6 @@ public class BioHttpHandler {
 
                     try {
                         request = HttpParser.parseRequest(in);
-
-                        logger.info(request.method() + " " + request.uri());
 
                         // Send 100 Continue
                         if (request.protocol().equals(Constant.HTTP_1_1)) {
@@ -69,18 +92,11 @@ public class BioHttpHandler {
                     response = null;
                 } finally {
                     if (response == null || response.header("connection").equals(Constant.CONNECTION_CLOSE)) {
-                        try {
-                            socket.close();
-                            logger.info(String.format("Close socket connection - %s:%d",
-                                    socket.getInetAddress().getHostName(), socket.getPort()));
-                        } catch (IOException e) {
-                            logger.error("An error occurred when closing socket", e);
-                        }
+                        closeTask();
                     }
                 }
-
             }
-
+            removeTask(this);
         }
     }
 }

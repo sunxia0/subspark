@@ -38,7 +38,7 @@ public class BioHttpListener implements Runnable {
         listenThread.start();
     }
 
-    public void stop() {
+    public void close() {
         try {
             serverSocket.close();
             listenThread.join();

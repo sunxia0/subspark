@@ -64,6 +64,7 @@ public class WebService {
         });
 
         ws.addRoute(Method.GET, "/shutdown", (req, resp) -> {
+            System.out.println("In get /shutdown");
             ws.stop();
             return null;
         });
@@ -88,8 +89,8 @@ public class WebService {
      * Gracefully shut down the server
      */
     public void stop() {
-        this.listener.stop();
-        this.ioHandler.shutdown();
+        this.listener.close();
+        this.ioHandler.close();
         logger.info("WebService has stopped");
     }
 

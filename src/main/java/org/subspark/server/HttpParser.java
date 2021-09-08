@@ -370,7 +370,7 @@ public class HttpParser {
 
         mergeChunkedBody(request);
 
-        logger.debug("\n" + request.headerString());
+        logger.info("Receive request:\n" + request.headerString());
 
         return request;
     }
@@ -380,7 +380,7 @@ public class HttpParser {
         byte[] body = response.bodyRaw();
 
         if (response.status() != Status.CONTINUE) {
-            logger.debug("\n" + headerString);
+            logger.info("Send response:\n" + headerString);
         }
 
         // Write header string (including status line and headers)
