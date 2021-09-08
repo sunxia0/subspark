@@ -1,7 +1,7 @@
-package org.subspark.server;
+package org.subspark;
 
-import org.subspark.server.http.Method;
-import org.subspark.server.http.Status;
+import org.subspark.http.Method;
+import org.subspark.http.Status;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ public class Router {
         routes.put(Method.PUT, new ArrayList<>());
         routes.put(Method.DELETE, new ArrayList<>());
         routes.put(Method.OPTIONS, new ArrayList<>());
+        routes.put(Method.CONNECT, new ArrayList<>());
         routes.put(Method.TRACE, new ArrayList<>());
     }
 
@@ -74,7 +75,7 @@ public class Router {
         return afterEntries;
     }
 
-    public void consume(HttpRequest request, HttpResponse response) {
+    public void consume(Request request, Response response) {
         List<RouteEntry> beforeEntries = findBeforeEntries(request.path());
         List<RouteEntry> routeEntries = findRouteEntries(request.method(), request.path());
         List<RouteEntry> afterEntries = findAfterEntries(request.path());

@@ -1,12 +1,12 @@
-package org.subspark.server;
+package org.subspark;
 
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.http.Method;
-import org.subspark.server.http.Status;
-import org.subspark.server.utils.DateUtils;
-import org.subspark.server.utils.FileUtils;
+import org.subspark.http.Method;
+import org.subspark.http.Status;
+import org.subspark.utils.DateUtils;
+import org.subspark.utils.FileUtils;
 
 public class StaticFilesHandler {
     private final static Logger logger = LogManager.getLogger(StaticFilesHandler.class);
@@ -19,7 +19,7 @@ public class StaticFilesHandler {
         this.staticFileLocation = staticFileLocation;
     }
 
-    private void consumeFileRequest(HttpRequest request, HttpResponse response) throws HaltException {
+    private void consumeFileRequest(Request request, Response response) throws HaltException {
         String fullPath = FileUtils.getFullPath(staticFileLocation, request.path());
         if (!FileUtils.fileExists(fullPath)) {
             throw new HaltException(Status.NOT_FOUND);
@@ -51,7 +51,7 @@ public class StaticFilesHandler {
         }
     }
 
-    public boolean consume(HttpRequest request, HttpResponse response) {
+    public boolean consume(Request request, Response response) {
         try {
             consumeFileRequest(request, response);
             return true;

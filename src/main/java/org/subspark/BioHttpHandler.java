@@ -1,8 +1,8 @@
-package org.subspark.server;
+package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.http.Method;
+import org.subspark.http.Method;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,11 +16,11 @@ import java.util.concurrent.Executors;
 public class BioHttpHandler {
     private final static Logger logger = LogManager.getLogger(BioHttpHandler.class);
 
-    private final WebService service;
+    private final Service service;
     private final ExecutorService executor;
     private final List<HttpTask> tasks;
 
-    public BioHttpHandler(WebService service) {
+    public BioHttpHandler(Service service) {
         this.service = service;
         this.executor = Executors.newFixedThreadPool(service.threadPool());
         this.tasks = new ArrayList<>();
@@ -65,8 +65,8 @@ public class BioHttpHandler {
         @Override
         public void run() {
             RequestHandler requestHandler = service.getRequestHandler();
-            HttpRequest request = null;
-            HttpResponse response = null;
+            Request request = null;
+            Response response = null;
 
             while (!socket.isClosed()) {
                 try {

@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 
 /**
@@ -7,5 +7,5 @@ package org.subspark.server;
  */
 @FunctionalInterface
 public interface Route {
-    Object handle(HttpRequest request, HttpResponse response) throws Exception;
+    Object handle(Request request, Response response) throws Exception;
 }

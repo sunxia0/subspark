@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 public final class Constant {
     private Constant() {}

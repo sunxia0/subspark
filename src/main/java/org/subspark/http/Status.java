@@ -1,4 +1,4 @@
-package org.subspark.server.http;
+package org.subspark.http;
 
 public enum Status {
     CONTINUE(100, "Continue"),

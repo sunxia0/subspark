@@ -1,4 +1,4 @@
-package org.subspark.server.utils;
+package org.subspark.utils;
 
 import java.nio.charset.StandardCharsets;
 

@@ -1,18 +1,18 @@
-package org.subspark.server;
+package org.subspark;
 
 
-import org.subspark.server.http.Status;
-import org.subspark.server.utils.DateUtils;
+import org.subspark.http.Status;
+import org.subspark.utils.DateUtils;
 
 public final class RequestResponseFactory {
     private RequestResponseFactory() {}
 
-    public static HttpRequest createHttpRequest() {
-        return new HttpRequest();
+    public static Request createHttpRequest() {
+        return new Request();
     }
 
-    public static HttpResponse createHttpResponse() {
-        HttpResponse response = new HttpResponse();
+    public static Response createHttpResponse() {
+        Response response = new Response();
 
         //Set HTTP version
         response.protocol(Constant.HTTP_1_1);
@@ -31,8 +31,8 @@ public final class RequestResponseFactory {
         return response;
     }
 
-    public static HttpResponse createHttpResponse(HaltException e) {
-        HttpResponse response = createHttpResponse();
+    public static Response createHttpResponse(HaltException e) {
+        Response response = createHttpResponse();
         response.status(e.getStatus());
         response.header("content-type", MimeType.TXT);
         response.header("connection", Constant.CONNECTION_CLOSE);
@@ -40,8 +40,8 @@ public final class RequestResponseFactory {
         return response;
     }
 
-    public static HttpResponse of100() {
-        HttpResponse response = createHttpResponse();
+    public static Response of100() {
+        Response response = createHttpResponse();
         response.status(Status.CONTINUE);
         return response;
     }

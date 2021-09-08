@@ -1,8 +1,8 @@
-package org.subspark.server.utils;
+package org.subspark.utils;
 
 
-import org.subspark.server.HaltException;
-import org.subspark.server.http.Status;
+import org.subspark.HaltException;
+import org.subspark.http.Status;
 
 import java.io.*;
 import java.util.StringTokenizer;

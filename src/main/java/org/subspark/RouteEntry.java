@@ -1,7 +1,7 @@
-package org.subspark.server;
+package org.subspark;
 
-import org.subspark.server.http.Method;
-import org.subspark.server.utils.SerializationUtils;
+import org.subspark.http.Method;
+import org.subspark.utils.SerializationUtils;
 
 public abstract class RouteEntry {
     private final Method method;
@@ -25,12 +25,12 @@ public abstract class RouteEntry {
                 && (this.method == null || method.equals(this.method) || method.equals(Method.HEAD) && this.method == Method.GET);
     }
 
-    public abstract void handle(HttpRequest request, HttpResponse response) throws Exception;
+    public abstract void handle(Request request, Response response) throws Exception;
 
     static RouteEntry createFromFilter(String path, Filter filter) {
         return new RouteEntry(null, path) {
             @Override
-            public void handle(HttpRequest request, HttpResponse response) throws Exception {
+            public void handle(Request request, Response response) throws Exception {
                 filter.handle(request, response);
             }
         };
@@ -39,7 +39,7 @@ public abstract class RouteEntry {
     static RouteEntry createFromRoute(Method method, String path, Route route) {
         return new RouteEntry(method, path) {
             @Override
-            public void handle(HttpRequest request, HttpResponse response) throws Exception {
+            public void handle(Request request, Response response) throws Exception {
                 // Add method check (e.g. if the request method is HEAD and the entry method is GET, the entry will not be executed.)
                 if (request.method() == method) {
                     Object body = route.handle(request, response);

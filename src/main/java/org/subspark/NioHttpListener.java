@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,11 +19,11 @@ public class NioHttpListener {
 
     private final static int BACK_LOG = 1024;
 
-    private WebService service;
+    private Service service;
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
 
-    public NioHttpListener(WebService service) {
+    public NioHttpListener(Service service) {
         this.service = service;
         this.initListener();
     }

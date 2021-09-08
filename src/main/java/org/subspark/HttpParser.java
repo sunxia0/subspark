@@ -30,11 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.subspark.server;
+package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.http.Status;
+import org.subspark.http.Status;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -93,7 +93,7 @@ public class HttpParser {
     /**
      * Decode each k/v of request query string
      */
-    private static void decodeQueryString(HttpRequest request, String queryString) throws HaltException {
+    private static void decodeQueryString(Request request, String queryString) throws HaltException {
         StringTokenizer tokenizer = new StringTokenizer(queryString, "&");
         String pair;
         int sep;
@@ -113,7 +113,7 @@ public class HttpParser {
     /**
      * Parse a head line and create k/v pair, return the current key
      */
-    private static String parseHeadline(HttpRequest request, String headerLine, String key) {
+    private static String parseHeadline(Request request, String headerLine, String key) {
         int sep = headerLine.indexOf(":");
 
         // Use trim() to ignore possible spaces and tabs
@@ -131,7 +131,7 @@ public class HttpParser {
     /**
      * Decode request header
      */
-    private static void decodeRequestHeader(HttpRequest request, BufferedReader headerBuffer) throws HaltException {
+    private static void decodeRequestHeader(Request request, BufferedReader headerBuffer) throws HaltException {
         try {
             // Request line
             String requestLine = headerBuffer.readLine();
@@ -209,7 +209,7 @@ public class HttpParser {
     /**
      * Check `Cookie` header and create Map for the request
      */
-    private static void generateCookiesHolder(HttpRequest request) throws HaltException {
+    private static void generateCookiesHolder(Request request) throws HaltException {
         String cookies = request.header("cookie");
 
         if (cookies != null) {
@@ -236,7 +236,7 @@ public class HttpParser {
      * If the request used chunked transfer, substitute the
      * chunked body with merged body
      */
-    private static void mergeChunkedBody(HttpRequest request) throws HaltException {
+    private static void mergeChunkedBody(Request request) throws HaltException {
         String transferEncoding = request.header("transfer-encoding");
         byte[] bodyRaw = request.bodyRaw();
 
@@ -294,8 +294,8 @@ public class HttpParser {
     /**
      * Parse InputStream and create Request object
      */
-    public static HttpRequest parseRequest(InputStream in) throws HaltException, IOException {
-        HttpRequest request = RequestResponseFactory.createHttpRequest();
+    public static Request parseRequest(InputStream in) throws HaltException, IOException {
+        Request request = RequestResponseFactory.createHttpRequest();
 
         // Enable mark/reset support
         BufferedInputStream bufferedIn = new BufferedInputStream(in, BUFFER_SIZE);
@@ -375,7 +375,7 @@ public class HttpParser {
         return request;
     }
 
-    public static void sendResponse(OutputStream out, HttpResponse response, boolean withBody) throws IOException {
+    public static void sendResponse(OutputStream out, Response response, boolean withBody) throws IOException {
         String headerString = response.headerString();
         byte[] body = response.bodyRaw();
 

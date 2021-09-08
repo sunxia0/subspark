@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 import java.util.Set;
 

@@ -1,55 +1,65 @@
 package org.subspark;
 
-import org.subspark.server.Session;
-import org.subspark.server.Route;
-import org.subspark.server.Filter;
-import org.subspark.server.HaltException;
+import org.subspark.http.Status;
 
 public class SubSpark {
 
-    // We don't want people to use the constructor
-    protected SubSpark() {}
+    private SubSpark() {}
 
     /**
      * Handle an HTTP GET request to the path
      */
     public static void get(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().get(path, route);
     }
 
     /**
      * Handle an HTTP POST request to the path
      */
     public static void post(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().post(path, route);
     }
 
     /**
      * Handle an HTTP PUT request to the path
      */
     public static void put(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().put(path, route);
     }
 
     /**
      * Handle an HTTP DELETE request to the path
      */
     public static void delete(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().delete(path, route);
     }
 
     /**
      * Handle an HTTP HEAD request to the path
      */
     public static void head(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().head(path, route);
     }
 
     /**
      * Handle an HTTP OPTIONS request to the path
      */
     public static void options(String path, Route route) {
-        throw new UnsupportedOperationException();
+        getInstance().options(path, route);
+    }
+
+    /**
+     * Handle an HTTP CONNECT request to the path
+     */
+    public static void connect(String path, Route route) {
+        getInstance().connect(path, route);
+    }
+
+    /**
+     * Handle an HTTP TRACE request to the path
+     */
+    public static void trace(String path, Route route) {
+        getInstance().trace(path, route);
     }
 
     ///////////////////////////////////////////////////
@@ -74,28 +84,39 @@ public class SubSpark {
      * Add filters that get called before a request
      */
     public static void before(String path, Filter... filters) {
-        throw new UnsupportedOperationException();
+        for (Filter filter : filters) {
+            getInstance().before(path, filter);
+        }
     }
 
     /**
      * Add filters that get called after a request
      */
     public static void after(String path, Filter... filters) {
-        throw new UnsupportedOperationException();
+        for (Filter filter : filters) {
+            getInstance().after(path, filter);
+        }
     }
 
     /**
      * Triggers a HaltException that terminates the request
      */
     public static HaltException halt() {
-        throw new UnsupportedOperationException();
+        throw getInstance().halt();
     }
 
     /**
      * Triggers a HaltException that terminates the request
      */
-    public static HaltException halt(int statusCode, String body) {
-        throw new UnsupportedOperationException();
+    public static HaltException halt(Status status) {
+        throw getInstance().halt(status);
+    }
+
+    /**
+     * Triggers a HaltException that terminates the request
+     */
+    public static HaltException halt(Status status, String body) {
+        throw getInstance().halt(status, body);
     }
 
     ////////////////////////////////////////////
@@ -103,7 +124,7 @@ public class SubSpark {
     ////////////////////////////////////////////
 
     /**
-     * Set the IP address to listen on (default 0.0.0.0)
+     * Set the IP address to listen on (default localhost)
      */
     public static void ipAddress(String ipAddress) {
         getInstance().ipAddress(ipAddress);
@@ -151,6 +172,10 @@ public class SubSpark {
     public static Session getSession(String id) {
         throw new UnsupportedOperationException();
     }
+
+    ////////////////////////////////////////////
+    // Singleton Service Instance
+    ////////////////////////////////////////////
 
     private static Service getInstance() {
         return ServiceHolder.INSTANCE;

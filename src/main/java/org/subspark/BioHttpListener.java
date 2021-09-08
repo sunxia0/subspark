@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,12 +14,12 @@ public class BioHttpListener implements Runnable {
 
     private final static int BACK_LOG = 1024;
 
-    private final WebService service;
+    private final Service service;
 
     private ServerSocket serverSocket;
     private Thread listenThread;
 
-    public BioHttpListener(WebService service) {
+    public BioHttpListener(Service service) {
         this.service = service;
         this.initListener();
     }

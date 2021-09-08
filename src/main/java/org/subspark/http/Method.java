@@ -1,7 +1,7 @@
-package org.subspark.server.http;
+package org.subspark.http;
 
 public enum Method {
-    HEAD, GET, POST, PUT, DELETE, OPTIONS, TRACE;
+    HEAD, GET, POST, PUT, DELETE, OPTIONS, CONNECT, TRACE;
 
     public static Method fromString(String method) {
         if (method == null)

@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 
 /**
@@ -8,5 +8,5 @@ package org.subspark.server;
  */
 @FunctionalInterface
 public interface Filter {
-    void handle(HttpRequest request, HttpResponse response) throws Exception;
+    void handle(Request request, Response response) throws Exception;
 }

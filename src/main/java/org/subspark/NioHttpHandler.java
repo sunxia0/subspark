@@ -1,4 +1,4 @@
-package org.subspark.server;
+package org.subspark;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,10 +14,10 @@ import org.apache.logging.log4j.Logger;
 public class NioHttpHandler {
     private final static Logger logger = LogManager.getLogger(NioHttpHandler.class);
 
-    private WebService service;
+    private Service service;
     private ExecutorService executor;
 
-    public NioHttpHandler(WebService service) {
+    public NioHttpHandler(Service service) {
         this.service = service;
         this.executor = Executors.newFixedThreadPool(service.threadPool());
     }

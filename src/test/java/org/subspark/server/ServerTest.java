@@ -1,7 +1,9 @@
 package org.subspark.server;
 
 import org.junit.*;
-import org.subspark.server.http.Method;
+import org.subspark.HttpParser;
+import org.subspark.Request;
+import org.subspark.http.Method;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -11,18 +13,17 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerTest {
-    private WebService ws;
+import static org.subspark.SubSpark.*;
 
+public class ServerTest {
     @Before
     public void setUp() {
-        ws = new WebService();
-        ws.start();
+        awaitInitialization();
     }
 
     @After
     public void tearDown() {
-        ws.stop();
+        stop();
     }
 
     @Ignore
@@ -38,7 +39,7 @@ public class ServerTest {
                 "\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in);
+        Request request = HttpParser.parseRequest(in);
 
         Assert.assertEquals(Method.GET, request.method());
         Assert.assertEquals("/api/blog/get", request.path());
@@ -183,7 +184,7 @@ public class ServerTest {
                 "footer3: val31,\n val32,\n\tval33\r\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in);
+        Request request = HttpParser.parseRequest(in);
 
         Assert.assertEquals("abcdefghijklmnopqrstuvwxyz1234567890abcdef", request.body());
         Assert.assertEquals("val1", request.header("footer1"));
@@ -203,7 +204,7 @@ public class ServerTest {
                 "Connection: close\n\n";
 
         ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
-        HttpRequest request = HttpParser.parseRequest(in);
+        Request request = HttpParser.parseRequest(in);
 
         Map<String, String> cookies = new HashMap<>(){{
            put("PHPSESSID", "298zf09hf012fh2");

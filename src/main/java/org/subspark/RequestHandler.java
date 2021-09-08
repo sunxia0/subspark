@@ -1,9 +1,9 @@
-package org.subspark.server;
+package org.subspark;
 
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.subspark.server.http.Status;
+import org.subspark.http.Status;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,20 +12,20 @@ import java.util.regex.Pattern;
 public class RequestHandler {
     private final static Logger logger = LogManager.getLogger(RequestHandler.class);
 
-    private final WebService service;
+    private final Service service;
 
     private final Pattern URLPattern;
 
-    public RequestHandler(WebService service) {
+    public RequestHandler(Service service) {
         this.service = service;
         this.URLPattern = Pattern.compile(String.format("^(http://%s:%d)?((/.*?)(\\?.*)?)$", service.ipAddress(), service.port()));
     }
 
-    public HttpResponse handleRequest(HttpRequest request) throws HaltException {
+    public Response handleRequest(Request request) throws HaltException {
         RequestChecker.checkAbsoluteURL(request, URLPattern);
         RequestChecker.checkSpecification(request);
 
-        HttpResponse response = RequestResponseFactory.createHttpResponse();
+        Response response = RequestResponseFactory.createHttpResponse();
         response.protocol(request.protocol());
 
         if (!RequestChecker.isKeepAlive(request))
@@ -39,7 +39,7 @@ public class RequestHandler {
         return response;
     }
 
-    public HttpResponse handleException(HaltException exception) {
+    public Response handleException(HaltException exception) {
         return RequestResponseFactory.createHttpResponse(exception);
     }
 
@@ -52,7 +52,7 @@ public class RequestHandler {
         /**
          * Handle absolute URL, and substitute it with relative URL
          */
-        public static void checkAbsoluteURL(HttpRequest request, Pattern URLPattern) throws HaltException {
+        public static void checkAbsoluteURL(Request request, Pattern URLPattern) throws HaltException {
             Matcher uriMatcher = URLPattern.matcher(request.uri());
 
             if (!uriMatcher.find())
@@ -75,7 +75,7 @@ public class RequestHandler {
         /**
          * Check the specification of request
          */
-        public static void checkSpecification(HttpRequest request) throws HaltException {
+        public static void checkSpecification(Request request) throws HaltException {
             // Invalid HTTP verb
             if (request.method() == null)
                 throw new HaltException(Status.BAD_REQUEST, "Invalid HTTP verb");
@@ -92,7 +92,7 @@ public class RequestHandler {
         /**
          * Check `connection` header and return whether the connection is persistent
          */
-        public static boolean isKeepAlive(HttpRequest request) {
+        public static boolean isKeepAlive(Request request) {
             String protocolVersion = request.protocol();
             String connection = request.header("connection");
             return protocolVersion.equals(Constant.HTTP_1_1)
