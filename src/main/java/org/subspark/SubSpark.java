@@ -8,6 +8,13 @@ public class SubSpark {
 
     /**
      * Handle an HTTP GET request to the path
+     *
+     * Notes for REST:
+     * Usually used for RETRIEVING resources.
+     *
+     * Consider using 302 or 307 response for
+     * redirection based on the actual situation
+     * when location of the resource has changed.
      */
     public static void get(String path, Route route) {
         getInstance().get(path, route);
@@ -15,6 +22,13 @@ public class SubSpark {
 
     /**
      * Handle an HTTP POST request to the path
+     *
+     * Notes for REST:
+     * Usually used for CREATING resources.
+     *
+     * If the resource to create exists, consider using
+     * 303 (See Other) response. Otherwise, consider us-
+     * ing 201 (Created) response.
      */
     public static void post(String path, Route route) {
         getInstance().post(path, route);
@@ -22,6 +36,9 @@ public class SubSpark {
 
     /**
      * Handle an HTTP PUT request to the path
+     *
+     * Notes for REST:
+     * Usually used for UPDATING resources.
      */
     public static void put(String path, Route route) {
         getInstance().put(path, route);
@@ -29,6 +46,12 @@ public class SubSpark {
 
     /**
      * Handle an HTTP DELETE request to the path
+     *
+     * Notes for REST:
+     * Usually used for DELETING resources.
+     *
+     * Consider using 204 (No Content) response to
+     * identify that the resource has been deleted.
      */
     public static void delete(String path, Route route) {
         getInstance().delete(path, route);
@@ -43,23 +66,13 @@ public class SubSpark {
 
     /**
      * Handle an HTTP OPTIONS request to the path
+     *
+     * Notes for REST:
+     * Use OPTIONS to tell clients how to use your application.
+     * For example, to tell clients your CORS settings
      */
     public static void options(String path, Route route) {
         getInstance().options(path, route);
-    }
-
-    /**
-     * Handle an HTTP CONNECT request to the path
-     */
-    public static void connect(String path, Route route) {
-        getInstance().connect(path, route);
-    }
-
-    /**
-     * Handle an HTTP TRACE request to the path
-     */
-    public static void trace(String path, Route route) {
-        getInstance().trace(path, route);
     }
 
     ///////////////////////////////////////////////////
@@ -154,8 +167,8 @@ public class SubSpark {
     /**
      * Hold until the server is fully initialized
      */
-    public static void awaitInitialization() {
-        getInstance().awaitInitialization();
+    public static void init() {
+        getInstance().init();
     }
 
     /**
