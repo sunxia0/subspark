@@ -28,8 +28,9 @@ public class RequestHandler {
         Response response = RequestResponseFactory.createHttpResponse();
         response.protocol(request.protocol());
 
-        if (!RequestChecker.isKeepAlive(request))
+        if (!RequestChecker.isKeepAlive(request)) {
             response.header("connection", Constant.CONNECTION_CLOSE);
+        }
 
         boolean isStaticConsumed = service.getStaticFilesHandler().consume(request, response);
         if (!isStaticConsumed) {
@@ -55,8 +56,9 @@ public class RequestHandler {
         public static void checkAbsoluteURL(Request request, Pattern URLPattern) throws HaltException {
             Matcher uriMatcher = URLPattern.matcher(request.uri());
 
-            if (!uriMatcher.find())
+            if (!uriMatcher.find()) {
                 throw new HaltException(Status.BAD_REQUEST, "Invalid Path");
+            }
 
             // Substitute absolute URL
             // for a URL "http://[hostname][:port]/path/to/file?key1=a&key2=b"
@@ -77,16 +79,19 @@ public class RequestHandler {
          */
         public static void checkSpecification(Request request) throws HaltException {
             // Invalid HTTP verb
-            if (request.method() == null)
-                throw new HaltException(Status.BAD_REQUEST, "Invalid HTTP verb");
+            if (request.method() == null) {
+                throw new HaltException(Status.NOT_IMPLEMENTED, "Unimplemented HTTP method");
+            }
 
             // Invalid HTTP protocol version
-            if (!Pattern.matches(HTTP_PROTOCOL_PATTERN, request.protocol()))
+            if (!Pattern.matches(HTTP_PROTOCOL_PATTERN, request.protocol())) {
                 throw new HaltException(Status.BAD_REQUEST, "Invalid HTTP protocol version");
+            }
 
             // Check `host` header for HTTP/1.1
-            if (request.protocol().equals(Constant.HTTP_1_1) && request.header("host") == null)
+            if (request.protocol().equals(Constant.HTTP_1_1) && request.header("host") == null) {
                 throw new HaltException(Status.BAD_REQUEST, "No \"Host\" header in an HTTP/1.1 request");
+            }
         }
 
         /**
