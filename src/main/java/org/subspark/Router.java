@@ -24,8 +24,6 @@ public class Router {
         routes.put(Method.PUT, new ArrayList<>());
         routes.put(Method.DELETE, new ArrayList<>());
         routes.put(Method.OPTIONS, new ArrayList<>());
-        routes.put(Method.CONNECT, new ArrayList<>());
-        routes.put(Method.TRACE, new ArrayList<>());
     }
 
     public void addBeforeFilter(String path, Filter filter) {
