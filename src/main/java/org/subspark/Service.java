@@ -76,7 +76,7 @@ public class Service {
      * Hold until the server is fully initialized.
      * Should be called after everything else.
      */
-    public void awaitInitialization() {
+    public void init() {
         logger.info("Initializing server");
         start();
         this.initialized = true;
@@ -241,20 +241,6 @@ public class Service {
      */
     public void options(String path, Route route) {
         addRoute(Method.OPTIONS, path, route);
-    }
-
-    /**
-     * Handle an HTTP CONNECT request to the path
-     */
-    public void connect(String path, Route route) {
-        addRoute(Method.CONNECT, path, route);
-    }
-
-    /**
-     * Handle an HTTP TRACE request to the path
-     */
-    public void trace(String path, Route route) {
-        addRoute(Method.TRACE, path, route);
     }
 
     /**

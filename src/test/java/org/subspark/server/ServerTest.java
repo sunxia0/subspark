@@ -18,7 +18,7 @@ import static org.subspark.SubSpark.*;
 public class ServerTest {
     @Before
     public void setUp() {
-        awaitInitialization();
+        init();
     }
 
     @After
