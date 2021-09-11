@@ -4,14 +4,20 @@ public enum Status {
     CONTINUE(100, "Continue"),
 
     OK(200, "OK"),
+    CREATED(201, "Created"),
+    NO_CONTENT(204, "No Content"),
 
+    MOVED_PERMANENTLY(302, "Moved Permanently"),
+    SEE_OTHER(303, "See Other"),
     NOT_MODIFIED(304, "Not Modified"),
+    TEMPORARY_REDIRECT(307, "Temporary Redirect"),
 
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     FORBIDDEN(403, "Forbidden"),
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    GONE(410, "Gone"),
     PRECONDITION_FAILED(412, "Precondition Failed"),
 
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
