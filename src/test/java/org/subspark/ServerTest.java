@@ -1,8 +1,6 @@
-package org.subspark.server;
+package org.subspark;
 
 import org.junit.*;
-import org.subspark.HttpParser;
-import org.subspark.Request;
 import org.subspark.http.Method;
 
 import java.io.ByteArrayInputStream;

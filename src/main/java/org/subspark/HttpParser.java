@@ -370,13 +370,13 @@ public class HttpParser {
 
         mergeChunkedBody(request);
 
-        logger.info("Receive request:\n" + request.headerString());
+        logger.info("Receive request:\n" + createRequestHeaderString(request));
 
         return request;
     }
 
     public static void sendResponse(OutputStream out, Response response, boolean withBody) throws IOException {
-        String headerString = response.headerString();
+        String headerString = createResponseHeaderString(response);
         byte[] body = response.bodyRaw();
 
         if (response.status() != Status.CONTINUE) {
@@ -393,5 +393,22 @@ public class HttpParser {
         if (withBody && body != null && body.length > 0) {
             out.write(body);
         }
+    }
+
+    private static String createRequestHeaderString(Request request) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(request.method()).append(' ').append(request.uri()).append(' ').append(request.protocol()).append("\r\n");
+        for (String name : request.headers()) {
+            sb.append(name).append(": ").append(request.header(name)).append("\r\n");
+        }
+        return sb.toString();
+    }
+
+    private static String createResponseHeaderString(Response response) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(response.protocol()).append(' ').append(response.statusDescription()).append("\r\n");
+        for (String name : response.headers())
+            sb.append(name).append(": ").append(response.header(name)).append("\r\n");
+        return sb.toString();
     }
 }

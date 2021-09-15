@@ -70,14 +70,6 @@ public class Response {
         return headers.keySet();
     }
 
-    public String headerString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(protocolVersion).append(' ').append(statusDescription()).append("\r\n");
-        for (Map.Entry<String, String> e : headers.entrySet())
-            sb.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
-        return sb.toString();
-    }
-
     // ============ for stage 2 ============
 
 //    public void redirect(String location) {

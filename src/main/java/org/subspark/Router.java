@@ -41,41 +41,49 @@ public class Router {
         routes.get(method).add(entry);
     }
 
-    private void findEntriesFromEntryList(List<RouteEntry> source, Method method, String path, List<RouteEntry> target) {
+    private List<RouteEntry> findEntriesFromEntryList(List<RouteEntry> source, Method method, String path) {
+        List<RouteEntry> target = new ArrayList<>();
         for (RouteEntry entry : source) {
             if (entry.matches(method, path)) {
                 target.add(entry);
             }
         }
+        return target;
     }
 
     private List<RouteEntry> findBeforeEntries(String path) {
-        List<RouteEntry> beforeEntries = new ArrayList<>();
-        findEntriesFromEntryList(beforeFilters, null, path, beforeEntries);
-        return beforeEntries;
+        return findEntriesFromEntryList(beforeFilters,null, path);
     }
 
-    private List<RouteEntry> findRouteEntries(Method method, String path) {
-        List<RouteEntry> routeEntries = new ArrayList<>();
-        findEntriesFromEntryList(routes.get(method), method, path, routeEntries);
+    private RouteEntry findRouteEntry(Method method, String path) {
+        List<RouteEntry> source = routes.get(method);
 
-        // If there is no candidate HEAD entry, try to find matching GET entries for HEAD requests.
-        if (method == Method.HEAD && routeEntries.isEmpty()) {
-            findEntriesFromEntryList(routes.get(Method.GET), method, path, routeEntries);
+        for (RouteEntry entry : source) {
+            if (entry.matches(method, path)) {
+                return entry;
+            }
         }
 
-        return routeEntries;
+        // If there is no candidate HEAD entry, try to find matching GET entries for HEAD requests.
+        if (method == Method.HEAD) {
+            source = routes.get(Method.GET);
+            for (RouteEntry entry : source) {
+                if (entry.matches(method, path)) {
+                    return entry;
+                }
+            }
+        }
+
+        return null;
     }
 
     private List<RouteEntry> findAfterEntries(String path) {
-        List<RouteEntry> afterEntries = new ArrayList<>();
-        findEntriesFromEntryList(afterFilters, null, path, afterEntries);
-        return afterEntries;
+        return findEntriesFromEntryList(afterFilters, null, path);
     }
 
     public void consume(Request request, Response response) {
         List<RouteEntry> beforeEntries = findBeforeEntries(request.path());
-        List<RouteEntry> routeEntries = findRouteEntries(request.method(), request.path());
+        RouteEntry routeEntry = findRouteEntry(request.method(), request.path());
         List<RouteEntry> afterEntries = findAfterEntries(request.path());
 
         try {
@@ -84,9 +92,13 @@ public class Router {
                 entry.handle(request, response);
             }
 
-            // Routes
-            for (RouteEntry entry : routeEntries) {
-                entry.handle(request, response);
+            // Route
+            if (routeEntry != null) {
+                routeEntry.handle(request, response);
+            } else {
+                response.status(Status.NOT_FOUND);
+                response.header("content-type", MimeType.TXT);
+                response.body(Status.NOT_FOUND.description());
             }
 
             // After filters
@@ -99,13 +111,6 @@ public class Router {
             response.status(halt.getStatus());
             response.header("content-type", MimeType.TXT);
             response.body(e.getMessage());
-            return;
-        }
-
-        if (routeEntries.isEmpty()) {
-            response.status(Status.NOT_FOUND);
-            response.header("content-type", MimeType.TXT);
-            response.body(Status.NOT_FOUND.description());
         }
     }
 }

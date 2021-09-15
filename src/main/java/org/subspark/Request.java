@@ -13,13 +13,17 @@ public class Request {
     private String protocolVersion;
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
+    private final Map<String, Object> attributes;
     private Map<String, String> cookiesHolder;
+    private Map<String, String> paramsHolder;
+    private List<String> wildcardsHolder;
     private String body;
     private byte[] bodyRaw;
 
     protected Request() {
         this.queryParams = new HashMap<>();
         this.headers = new HashMap<>();
+        this.attributes = new HashMap<>();
     }
 
     /**
@@ -50,7 +54,15 @@ public class Request {
     }
 
     protected void cookiesHolder(Map<String, String> cookiesHolder) {
-        this.cookiesHolder =cookiesHolder;
+        this.cookiesHolder = cookiesHolder;
+    }
+
+    protected void paramsHolder(Map<String, String> paramsHolder) {
+        this.paramsHolder = paramsHolder;
+    }
+
+    protected void wildcardsHolder(List<String> wildcardsHolder) {
+        this.wildcardsHolder = wildcardsHolder;
     }
 
     protected void header(String key, String value) {
@@ -138,15 +150,6 @@ public class Request {
         return bodyRaw;
     }
 
-    public String headerString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(method).append(' ').append(uri).append(' ').append(protocolVersion).append("\r\n");
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
-        }
-        return sb.toString();
-    }
-
     public Map<String, String> cookies() {
         return cookiesHolder;
     }
@@ -166,46 +169,53 @@ public class Request {
         return null;
     }
 
-//    /**
-//     * @return a map containing the route parameters
-//     */
-//    public Map<String, String> params() {
-//        return null;
-//    }
-//
-//    /**
-//     * @return the named parameter Example: parameter 'name' from the following
-//     *         pattern: (get '/hello/:name')
-//     */
-//    public String params(String param) {
-//        if (param == null)
-//            return null;
-//
-//        if (param.startsWith(":")) {
-//            return params().get(param.toLowerCase());
-//        } else {
-//            return params().get(':' + param.toLowerCase());
-//        }
-//    }
-//
-//    /**
-//     * Add an attribute to the request (eg in a filter)
-//     */
-//    public void attribute(String attrib, Object val) {
-//    }
-//
-//    /**
-//     * @return Gets an attribute attached to the request
-//     */
-//    public Object attribute(String attrib) {
-//        return null;
-//    }
-//
-//    /**
-//     * @return All attributes attached to the request
-//     */
-//    public Set<String> attributes() {
-//        return null;
-//    }
+    /**
+     * Add an attribute to the request (eg in a filter)
+     */
+    public void attribute(String attrib, Object val) {
+        attributes.put(attrib, val);
+    }
 
+    /**
+     * @return Gets an attribute attached to the request
+     */
+    public Object attribute(String attrib) {
+        return attributes.get(attrib);
+    }
+
+    /**
+     * @return All attributes attached to the request
+     */
+    public Set<String> attributes() {
+        return attributes.keySet();
+    }
+
+    /**
+     * @return a map containing the route parameters
+     */
+    public Map<String, String> namedParams() {
+        return paramsHolder;
+    }
+
+    /**
+     * @return the named parameter Example: parameter 'name' from the following
+     *         pattern: (get '/hello/:name')
+     */
+    public String namedParam(String param) {
+        if (param == null)
+            return null;
+
+        if (param.startsWith(":")) {
+            return namedParams().get(param.toLowerCase());
+        } else {
+            return namedParams().get(':' + param.toLowerCase());
+        }
+    }
+
+    /**
+     * @return a list containing all wildcards
+     */
+    public List<String> wildcards() {
+        return wildcardsHolder;
+    }
 }
