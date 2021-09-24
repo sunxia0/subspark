@@ -32,6 +32,8 @@ It provides a built-in small HTTP server which supports HTTP/1.1 and a framework
 ### Reference
 
 - [MDN Web Docs - HTTP response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
+- [MDN Web Docs - HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies)
+- [MDN Web Docs - Set-Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
 - [RFC 7231 - Request Methods](https://greenbytes.de/tech/webdav/rfc7231.html#methods)
 - [RFC 2616](https://datatracker.ietf.org/doc/html/rfc2616)
 - [HTTP Made Really Easy](https://jmarshall.com/easy/http/)

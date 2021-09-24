@@ -34,11 +34,11 @@ public class CookieManager {
         return builder.toString();
     }
 
-    public void cookie(String name, String value, int maxAge, boolean httpOnly) {
+    void cookie(String name, String value, int maxAge, boolean httpOnly) {
         cookie(null, name, value, maxAge, httpOnly);
     }
 
-    public void cookie(String path, String name, String value, int maxAge, boolean httpOnly) {
+    void cookie(String path, String name, String value, int maxAge, boolean httpOnly) {
         // Secure flag is unsupported in current HTTP/1.1 server
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(path);
@@ -48,11 +48,11 @@ public class CookieManager {
         cookieHolder.put(cookieIdentifier, cookie);
     }
 
-    public void removeCookie(String name) {
+    void removeCookie(String name) {
         removeCookie(null, name);
     }
 
-    public void removeCookie(String path, String name) {
+    void removeCookie(String path, String name) {
         Cookie cookie = new Cookie(name, "");
         cookie.setPath(path);
         cookie.setMaxAge(0);
@@ -60,7 +60,7 @@ public class CookieManager {
         cookieHolder.put(cookieIdentifier, cookie);
     }
 
-    public String toSetCookieString() {
+    String toSetCookieString() {
         StringBuilder builder = new StringBuilder();
         for (Cookie cookie : cookieHolder.values()) {
             builder.append("set-cookie: ").append(toSetCookieValue(cookie)).append("\r\n");
