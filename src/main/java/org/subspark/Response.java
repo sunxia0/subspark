@@ -13,9 +13,11 @@ public class Response {
     private Status status;
     private final Map<String, String> headers;
     private byte[] body;
+    private CookieManager cookieManager;
 
     protected Response() {
         this.headers = new HashMap<>();
+        this.cookieManager = new CookieManager();
     }
 
     // Can't be set by user
@@ -70,7 +72,41 @@ public class Response {
         return headers.keySet();
     }
 
-    // ============ for stage 2 ============
+    protected String setCookieString() {
+        return cookieManager.toSetCookieString();
+    }
+
+    public void cookie(String name, String value) {
+        cookieManager.cookie(name, value, -1, false);
+    }
+
+    public void cookie(String name, String value, int maxAge) {
+        cookieManager.cookie(name, value, maxAge, false);
+    }
+
+    public void cookie(String name, String value, int maxAge, boolean httpOnly) {
+        cookieManager.cookie(name, value, maxAge, httpOnly);
+    }
+
+    public void cookie(String path, String name, String value) {
+        cookie(path, name, value, -1, false);
+    }
+
+    public void cookie(String path, String name, String value, int maxAge) {
+        cookie(path, name, value, maxAge, false);
+    }
+
+    public void cookie(String path, String name, String value, int maxAge, boolean httpOnly) {
+        cookieManager.cookie(path, name, value, maxAge, httpOnly);
+    }
+
+    public void removeCookie(String name) {
+        cookieManager.removeCookie(name);
+    }
+
+    public void removeCookie(String path, String name) {
+        cookieManager.removeCookie(path, name);
+    }
 
 //    public void redirect(String location) {
 //
@@ -80,43 +116,4 @@ public class Response {
 //
 //    }
 //
-//    public void cookie(String name, String value) {
-//
-//    }
-//
-//    public void cookie(String name, String value, int maxAge) {
-//
-//    }
-//
-//    public void cookie(String name, String value, int maxAge, boolean secured) {
-//
-//    }
-//
-//    public void cookie(String name, String value, int maxAge, boolean secured, boolean httpOnly) {
-//
-//    }
-//
-//    public void cookie(String path, String name, String value) {
-//
-//    }
-//
-//    public void cookie(String path, String name, String value, int maxAge) {
-//
-//    }
-//
-//    public void cookie(String path, String name, String value, int maxAge, boolean secured) {
-//
-//    }
-//
-//    public void cookie(String path, String name, String value, int maxAge, boolean secured, boolean httpOnly) {
-//
-//    }
-//
-//    public void removeCookie(String name) {
-//
-//    }
-//
-//    public void removeCookie(String path, String name) {
-//
-//    }
 }

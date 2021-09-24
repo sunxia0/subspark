@@ -409,6 +409,7 @@ public class HttpParser {
         sb.append(response.protocol()).append(' ').append(response.statusDescription()).append("\r\n");
         for (String name : response.headers())
             sb.append(name).append(": ").append(response.header(name)).append("\r\n");
+        sb.append(response.setCookieString());
         return sb.toString();
     }
 }
