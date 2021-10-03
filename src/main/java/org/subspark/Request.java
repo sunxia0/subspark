@@ -19,6 +19,8 @@ public class Request {
     private List<String> wildcardsHolder;
     private String body;
     private byte[] bodyRaw;
+    private Session session;
+    private SessionManager sessionManager;
 
     protected Request() {
         this.queryParams = new HashMap<>();
@@ -72,6 +74,10 @@ public class Request {
     protected void body(byte[] bodyRaw) {
         this.bodyRaw = bodyRaw;
         this.body = new String(this.bodyRaw);
+    }
+
+    protected void setSessionManager(SessionManager manager) {
+        this.sessionManager = manager;
     }
 
     /**
@@ -166,7 +172,20 @@ public class Request {
      * @return Gets the session associated with this request
      */
     public Session session() {
-        return null;
+        return session(true);
+    }
+
+    public Session session(boolean createIfNone) {
+        if (this.session == null || !this.session.isValid()) {
+            String id = cookie(SessionManager.SESSION_ID_COOKIE_NAME);
+            Session session = sessionManager.fromSessionId(id);
+            if (session == null && createIfNone) {
+                this.session = sessionManager.newSession();
+            } else {
+                this.session = session;
+            }
+        }
+        return this.session;
     }
 
     /**

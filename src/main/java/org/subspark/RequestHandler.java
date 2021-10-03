@@ -16,9 +16,16 @@ public class RequestHandler {
 
     private final Pattern URLPattern;
 
+    private final SessionManager sessionManager;
+
     public RequestHandler(Service service) {
         this.service = service;
         this.URLPattern = Pattern.compile(String.format("^(http://%s:%d)?((/.*?)(\\?.*)?)$", service.ipAddress(), service.port()));
+        this.sessionManager = new SessionManager();
+    }
+
+    public void close() {
+        this.sessionManager.shutdown();
     }
 
     public Response handleRequest(Request request) throws HaltException {
@@ -34,7 +41,9 @@ public class RequestHandler {
 
         boolean isStaticConsumed = service.getStaticFilesHandler().consume(request, response);
         if (!isStaticConsumed) {
+            request.setSessionManager(sessionManager);
             service.getRouter().consume(request, response);
+            SessionManager.setCookieSessionId(request, response);
         }
 
         return response;

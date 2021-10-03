@@ -16,6 +16,11 @@ public abstract class Session {
     public abstract long lastAccessedTime();
 
     /**
+     * Test if the session is valid
+     */
+    public abstract boolean isValid();
+
+    /**
      * Invalidate the session
      */
     public abstract void invalidate();

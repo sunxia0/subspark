@@ -6,11 +6,9 @@ import java.util.Map;
 
 public class CookieManager {
     // Key: cookie identifier (`name`@`path`)
-    private Map<String, Cookie> cookieHolder;
+    private Map<String, Cookie> cookieHolder = new HashMap<>();
 
-    CookieManager() {
-        this.cookieHolder = new HashMap<>();
-    }
+    CookieManager() {}
 
     private static String toSetCookieValue(Cookie cookie) {
         StringBuilder builder = new StringBuilder();

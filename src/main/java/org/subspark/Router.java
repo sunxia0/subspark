@@ -1,7 +1,10 @@
 package org.subspark;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.subspark.http.Method;
 import org.subspark.http.Status;
+import org.subspark.utils.IOUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Router {
+    private final static Logger logger = LogManager.getLogger(Router.class);
+
     private final List<RouteEntry> beforeFilters;
     private final List<RouteEntry> afterFilters;
     private final Map<Method, List<RouteEntry>> routes;
@@ -106,6 +111,7 @@ public class Router {
                 entry.handle(request, response);
             }
         } catch (Exception e) {
+            logger.error(IOUtils.getStackTraceString(e));
             HaltException halt = e instanceof HaltException ?
                     (HaltException) e : new HaltException(Status.INTERNAL_SERVER_ERROR, e.getMessage());
             response.status(halt.getStatus());

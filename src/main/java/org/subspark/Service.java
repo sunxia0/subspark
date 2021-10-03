@@ -69,6 +69,7 @@ public class Service {
     public void stop() {
         this.listener.close();
         this.ioHandler.close();
+        this.requestHandler.close();
         logger.info("SubSpark Service has stopped");
     }
 
