@@ -108,12 +108,18 @@ public class Response {
         cookieManager.removeCookie(path, name);
     }
 
-//    public void redirect(String location) {
-//
-//    }
-//
-//    public void redirect(String location, int httpStatusCode) {
-//
-//    }
-//
+    public void redirect(String location) {
+        redirect(location, Status.FOUND);
+    }
+
+    public void redirect(String location, Status status) {
+        int codeStartDigit = status.code() / 100;
+        if (codeStartDigit != 3) {
+            throw new IllegalArgumentException("Use 3xx status for redirection!");
+        }
+        status(status);
+        header("location", location);
+        header("connection", Constant.CONNECTION_CLOSE);
+    }
+
 }

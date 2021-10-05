@@ -111,7 +111,7 @@ public class Router {
                 entry.handle(request, response);
             }
         } catch (Exception e) {
-            logger.error(IOUtils.getStackTraceString(e));
+            logger.warn(IOUtils.getStackTraceString(e));
             HaltException halt = e instanceof HaltException ?
                     (HaltException) e : new HaltException(Status.INTERNAL_SERVER_ERROR, e.getMessage());
             response.status(halt.getStatus());

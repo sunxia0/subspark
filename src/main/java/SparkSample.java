@@ -6,19 +6,29 @@ public class SparkSample {
 
         init();
 
-        before("/test", (req, res) -> System.out.println("In before"));
-//        head("/test", (req, res) -> {
-//            System.out.println("In head /test");
-//            return "123";
-//        });
-        get("/test", (req, res) -> {
-            System.out.println("In get /test");
-            return "123";
+        before("/test", (req, res) -> {
+            throw new RuntimeException("Runtime Exception in before");
         });
-//        post("/test", (req, res) -> {
-//            System.out.println("In post /test");
-//            return "123";
-//        });
-        after("/test", (req, res) -> System.out.println("In after"));
+
+        get("/test" , (req, res) -> {
+            return "Trig get /test";
+        });
+
+        post("/say/hello/to/you/*", (req, res) -> {
+            return "reach /say/hello/to/you/*";
+        });
+
+        post("/say/:key1/to/:key2", (req, res) -> {
+            return "reach /say/:key1/to/:key2";
+        });
+
+        post("/say/*", (req, res) -> {
+            System.out.println("In post /say/*");
+            System.out.println("Splat: ");
+            for (String s : req.splat()) {
+                System.out.println(s);
+            }
+            return "reach /say/*";
+        });
     }
 }

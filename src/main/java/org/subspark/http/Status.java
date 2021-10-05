@@ -7,10 +7,12 @@ public enum Status {
     CREATED(201, "Created"),
     NO_CONTENT(204, "No Content"),
 
-    MOVED_PERMANENTLY(302, "Moved Permanently"),
+    MOVED_PERMANENTLY(301, "Moved Permanently"),
+    FOUND(302, "Found"),
     SEE_OTHER(303, "See Other"),
     NOT_MODIFIED(304, "Not Modified"),
     TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+    PERMANENT_REDIRECT(308, "Permanent Redirect"),
 
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
@@ -32,9 +34,11 @@ public enum Status {
     }
 
     public static Status fromStatusCode(int statusCode) {
-        for (Status status : values())
-            if (status.code() == statusCode)
+        for (Status status : values()) {
+            if (status.code() == statusCode) {
                 return status;
+            }
+        }
         return null;
     }
 
