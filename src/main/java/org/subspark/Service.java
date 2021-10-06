@@ -247,20 +247,6 @@ public class Service {
     /**
      * Add filters that get called before a request
      */
-    public void before(Filter filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Add filters that get called after a request
-     */
-    public void after(Filter filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Add filters that get called before a request
-     */
     public void before(String path, Filter filter) {
         addBeforeFilter(path, filter);
     }

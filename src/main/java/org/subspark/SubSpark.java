@@ -82,20 +82,6 @@ public class SubSpark {
     /**
      * Add filters that get called before a request
      */
-    public static void before(Filter... filters) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Add filters that get called after a request
-     */
-    public static void after(Filter... filters) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Add filters that get called before a request
-     */
     public static void before(String path, Filter... filters) {
         for (Filter filter : filters) {
             getInstance().before(path, filter);
@@ -176,14 +162,6 @@ public class SubSpark {
      */
     public static void stop() {
         getInstance().stop();
-    }
-
-    public static String createSession() {
-        throw new UnsupportedOperationException();
-    }
-
-    public static Session getSession(String id) {
-        throw new UnsupportedOperationException();
     }
 
     ////////////////////////////////////////////
