@@ -3,6 +3,9 @@ package org.subspark;
 import java.util.Set;
 
 public abstract class Session {
+    /**
+     * Id of this Session object
+     */
     public abstract String id();
 
     /**
@@ -36,8 +39,7 @@ public abstract class Session {
     public abstract void maxInactiveInterval(int interval);
 
     /**
-     * Notify the session that it was just accessed -- should update the last
-     * accessed time
+     * Notify the session that it was just accessed
      */
     public abstract void access();
 

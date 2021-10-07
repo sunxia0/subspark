@@ -81,7 +81,7 @@ public class Request {
     }
 
     /**
-     * The request method (GET, POST, ...)
+     * @return The request method (GET, POST, ...)
      */
     public Method method() {
         return method;
@@ -102,17 +102,23 @@ public class Request {
     }
 
     /**
-     * @return Query parameter from the URL
+     * @return The value of specified query parameter
      */
     public String queryParam(String param) {
         return queryParams.get(param);
     }
 
+    /**
+     * @return The value of specified query parameter or default value if the parameter does not exist
+     */
     public String queryParamOrDefault(String param, String def) {
         String ret = queryParam(param);
         return (ret == null) ? def : ret;
     }
 
+    /**
+     * @return Names of all query parameters
+     */
     public Set<String> queryParams() {
         return queryParams.keySet();
     }
@@ -132,12 +138,15 @@ public class Request {
     }
 
     /**
-     * @return Get the item from the header
+     * @return The item from the header
      */
     public String header(String name) {
         return headers.get(name);
     }
 
+    /**
+     * @return Names of all headers
+     */
     public Set<String> headers() {
         return headers.keySet();
     }
@@ -156,10 +165,16 @@ public class Request {
         return bodyRaw;
     }
 
+    /**
+     * @return All cookie pairs
+     */
     public Map<String, String> cookies() {
         return cookiesHolder;
     }
 
+    /**
+     * @return Value of cookie with specified name.
+     */
     public String cookie(String name) {
         if (name == null || cookies() == null) {
             return null;
@@ -169,12 +184,17 @@ public class Request {
     }
 
     /**
-     * @return Gets the session associated with this request
+     * @return Session associated with this request
      */
     public Session session() {
         return session(true);
     }
 
+    /**
+     * @return Session associated with this request.
+     *         A new object or null will be returned
+     *         based on the value of @param createIfNone
+     */
     public Session session(boolean createIfNone) {
         if (this.session == null || !this.session.isValid()) {
             String id = cookie(SessionManager.SESSION_ID_COOKIE_NAME);
@@ -196,14 +216,14 @@ public class Request {
     }
 
     /**
-     * @return Gets an attribute attached to the request
+     * @return An attribute attached to the request
      */
     public Object attribute(String attrib) {
         return attributes.get(attrib);
     }
 
     /**
-     * @return All attributes attached to the request
+     * @return Names of all attributes attached to the request
      */
     public Set<String> attributes() {
         return attributes.keySet();

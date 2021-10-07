@@ -113,6 +113,9 @@ public class Response {
     }
 
     public void redirect(String location, Status status) {
+        if (status == null) {
+            throw new IllegalArgumentException("Value of status can't be null!");
+        }
         int codeStartDigit = status.code() / 100;
         if (codeStartDigit != 3) {
             throw new IllegalArgumentException("Use 3xx status for redirection!");
