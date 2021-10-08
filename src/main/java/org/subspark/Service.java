@@ -47,9 +47,6 @@ public class Service {
     }
 
     Service() {
-        this.listener = new BioHttpListener(this);
-        this.ioHandler = new BioHttpHandler(this);
-        this.requestHandler =  new RequestHandler(this);
         this.staticFilesHandler = new StaticFilesHandler();
         this.router = new Router();
     }
@@ -58,6 +55,9 @@ public class Service {
      * Launches the Web server thread pool and the listener
      */
     private void start() {
+        this.listener = new BioHttpListener(this);
+        this.ioHandler = new BioHttpHandler(this);
+        this.requestHandler =  new RequestHandler(this);
         this.staticFilesHandler.staticFileLocation(staticFileLocation);
         this.listener.listen();
         logger.info("SubSpark Service has started");
