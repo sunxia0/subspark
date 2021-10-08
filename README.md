@@ -8,6 +8,10 @@ It provides a built-in small HTTP server which supports HTTP/1.1 and a framework
 
 (p.p.s. If you want a robuster framework, check [Spark](http://sparkjava.com/) please as SubSpark only implemented part of its features.)
 
+## Runtime
+
+* JDK >= 10
+
 ## Example
 
 ```java
@@ -25,6 +29,10 @@ public class WebServer {
 ```
 
 Send an GET request to `http://localhost:8080/hello` and see what will happen.
+
+## Architecture
+
+<img src="./subspark.png" width="60%" alt="architecture of subspark"/>
 
 ## Core API
 
@@ -121,6 +129,8 @@ options(String path, (req, res) -> {
 });
 ```
 
+The matching order of routes corresponds to their definition order. One request can  match  only one route at once, which means if two routes matches the path of the request, only the route that defined first will be executed.
+
 Each HTTP verb has its semantics in RESTful style:
 
 * **GET**
@@ -146,8 +156,6 @@ Each HTTP verb has its semantics in RESTful style:
 * **OPTIONS**
 
   OPTIONS is usually used for returning configuration information of the application.
-
-The matching order of routes coresponds to their definition order.
 
 ### Filter
 
@@ -188,7 +196,7 @@ after(String path, (req, res) -> {
 }, ...);
 ```
 
-The matching order of filters also coresponds to their definition order, just like the rule in route.
+Differs from the rule in route, multiple filters can be executed if they matches the path of the request. The running order is the same as their definition order.
 
 ### Exception
 
