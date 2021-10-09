@@ -17,6 +17,7 @@ public class StaticFilesHandler {
 
     public void staticFileLocation(String staticFileLocation) {
         this.staticFileLocation = staticFileLocation;
+        logger.info(String.format("Static files location: %s", staticFileLocation));
     }
 
     private void consumeFileRequest(Request request, Response response) throws HaltException {

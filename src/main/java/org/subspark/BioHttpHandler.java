@@ -24,6 +24,7 @@ public class BioHttpHandler {
         this.service = service;
         this.executor = Executors.newFixedThreadPool(service.threadPool());
         this.tasks = new ArrayList<>();
+        logger.info(String.format("Working threads: %d", service.threadPool()));
     }
 
     public void handle(Socket socket) {

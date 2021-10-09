@@ -29,6 +29,8 @@ public class BioHttpListener implements Runnable {
             this.serverSocket = new ServerSocket();
             this.serverSocket.bind(new InetSocketAddress(service.ipAddress(), service.port()), BACK_LOG);
             this.listenThread = new Thread(this);
+            logger.info(String.format("Server binds on %s:%d",
+                    service.ipAddress(), service.port()));
         } catch (IOException e) {
             logger.error("An error occurred when initializing server socket", e);
         }
@@ -49,8 +51,7 @@ public class BioHttpListener implements Runnable {
 
     @Override
     public void run() {
-        logger.info(String.format("Server starts listening on %s:%d",
-                service.ipAddress(), service.port()));
+        logger.info("Server starts listening ...");
 
         while (true) {
             Socket socket;
