@@ -71,12 +71,14 @@ public class HttpParser {
         while (split + 1 < end) {
 
             // RFC 2616 (Each line ends with '\r\n')
-            if (split + 3 < end && buffer[split] == '\r' && buffer[split + 1] == '\n' && buffer[split + 2] == '\r' && buffer[split + 3] == '\n')
+            if (split + 3 < end && buffer[split] == '\r' && buffer[split + 1] == '\n' && buffer[split + 2] == '\r' && buffer[split + 3] == '\n') {
                 return split + 4;
+            }
 
             // Tolerance (Each line ends with '\n')
-            if (buffer[split] == '\n' && buffer[split + 1] == '\n')
+            if (buffer[split] == '\n' && buffer[split + 1] == '\n') {
                 return split + 2;
+            }
 
             split++;
         }
@@ -102,8 +104,9 @@ public class HttpParser {
             pair = tokenizer.nextToken();
             sep = pair.indexOf("=");
 
-            if (sep == -1)
+            if (sep == -1) {
                 throw new HaltException(Status.BAD_REQUEST, "Invalid query string");
+            }
 
             // The value of the next parameter with the same name will override the value of the previous one
             request.queryParam(decodePercent(pair.substring(0, sep)), decodePercent(pair.substring(sep + 1)));
@@ -138,13 +141,15 @@ public class HttpParser {
             StringTokenizer tokenizer = new StringTokenizer(requestLine);
 
             // Get method
-            if (!tokenizer.hasMoreTokens())
+            if (!tokenizer.hasMoreTokens()) {
                 throw new HaltException(Status.BAD_REQUEST, "No HTTP verb in request");
+            }
             request.method(tokenizer.nextToken());
 
             // Get URI
-            if (!tokenizer.hasMoreTokens())
+            if (!tokenizer.hasMoreTokens()) {
                 throw new HaltException(Status.BAD_REQUEST, "No path in request");
+            }
             String rawURI = tokenizer.nextToken();
             String path, queryString;
 
@@ -193,8 +198,9 @@ public class HttpParser {
         int bodyLength = 0;
         int start = 0;
 
-        for (byte[] parts : bodyBuffer)
+        for (byte[] parts : bodyBuffer) {
             bodyLength += parts.length;
+        }
 
         body = new byte[bodyLength];
 
@@ -221,8 +227,9 @@ public class HttpParser {
                 kv = kv.trim();
                 if (kv.length() > 0) {
                     sep = kv.indexOf("=");
-                    if (sep == -1)
+                    if (sep == -1) {
                         throw new HaltException(Status.BAD_REQUEST, "Invalid cookie value");
+                    }
                     cookiesHolder.put(kv.substring(0, sep), kv.substring(sep + 1));
                 }
             }
@@ -252,8 +259,9 @@ public class HttpParser {
                     if (!bodyEnd) {
                         // Check semicolon
                         sep = line.indexOf(";");
-                        if (sep != -1)
+                        if (sep != -1) {
                             line = line.substring(0, sep);
+                        }
 
                         try {
                             lineLength = Integer.parseInt(line, 16);
@@ -313,22 +321,25 @@ public class HttpParser {
         bufferedIn.mark(BUFFER_SIZE);
         read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
 
-        if (read == -1)
-            throw new HaltException(Status.BAD_REQUEST, "Empty request!");
+        if (read == -1) {
+            throw new EOFException("Socket reaches eof.");
+        }
 
         while (readLength <= BUFFER_SIZE && read > 0) {
             split = findHeaderEnd(buffer, readLength, readLength + read);
 
-            if (split > 0)
+            if (split > 0) {
                 break;
+            }
 
             readLength += read;
             read = bufferedIn.read(buffer, readLength, BUFFER_SIZE - readLength);
         }
 
         // Don't find split byte, invalid request
-        if (split == 0)
+        if (split == 0) {
             throw new HaltException(Status.BAD_REQUEST, "Invalid split byte");
+        }
 
         BufferedReader headerBuffer = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buffer, 0, split)));
         decodeRequestHeader(request, headerBuffer);
@@ -340,8 +351,9 @@ public class HttpParser {
             long skipped = bufferedIn.skip(split);
 
             // Abnormal skip
-            if (skipped < split)
+            if (skipped < split) {
                 throw new IOException();
+            }
 
         } catch (IOException e) {
             logger.error("An abnormal header split detected", e);
@@ -352,12 +364,14 @@ public class HttpParser {
         while (bufferedIn.available() > 0){
             read = bufferedIn.read(buffer, 0, BUFFER_SIZE);
 
-            if (read <= 0)
+            if (read <= 0) {
                 break;
+            }
 
             // Too large request body
-            if (bodyBuffer.size() == MAXIMUM_BODY_BUFFER_PAGE)
+            if (bodyBuffer.size() == MAXIMUM_BODY_BUFFER_PAGE) {
                 throw new HaltException(Status.BAD_REQUEST, "Too large request body");
+            }
 
             body = new byte[read];
             System.arraycopy(buffer, 0, body, 0, read);
@@ -407,8 +421,9 @@ public class HttpParser {
     private static String createResponseHeaderString(Response response) {
         StringBuilder sb = new StringBuilder();
         sb.append(response.protocol()).append(' ').append(response.statusDescription()).append("\r\n");
-        for (String name : response.headers())
+        for (String name : response.headers()) {
             sb.append(name).append(": ").append(response.header(name)).append("\r\n");
+        }
         sb.append(response.setCookieString());
         return sb.toString();
     }
